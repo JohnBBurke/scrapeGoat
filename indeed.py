@@ -5,6 +5,7 @@ import json
 import csv
 import itertools
 
+print
 directory = raw_input('what directory? ')
 print
 what = raw_input('what: ')
