@@ -133,3 +133,5 @@ for x in testList:
         pass
 print 
 print len(nonScraped), 'out of', len(noReps)
+
+print what.upper()+where+'.csv','is ready in',directory
