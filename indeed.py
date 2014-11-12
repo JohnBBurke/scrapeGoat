@@ -5,6 +5,13 @@ import json
 import csv
 import itertools
 
+directory = raw_input('what directory? ')
+print
+what = raw_input('what: ')
+print 
+where = raw_input('where: ')
+print 
+
 def try_int(x):
     try:
         return int(x)
@@ -13,7 +20,7 @@ def try_int(x):
 
 def writeCsv():
     csvList.append([firmName,jobTitle,jobCity,jobState,number])
-    with open('/Users/macuser/'+what.upper()+where+'.csv','w') as f:
+    with open(directory+what.upper()+where+'.csv','w') as f:
         writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
         [writer.writerow(row) for row in csvList]
 
