@@ -17,20 +17,17 @@ def try_int(x):
         return int(x)
     except ValueError:
         pass
-
+    
 def writeCsv():
     csvList.append([firmName,jobTitle,jobCity,jobState,number])
     with open(directory+what.upper()+where+'.csv','w') as f:
         writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
         [writer.writerow(row) for row in csvList]
-
+        
 getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
 
 regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
 altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
-
-what = 'it'
-where = 'nashville'
 
 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire'
 r = requests.get(url)
@@ -43,7 +40,7 @@ searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 i = 0
 testList = []
 csvList = []
-while i<20: # change to searchLimit when not testing
+while i<10: # change to searchLimit when not testing
     try:
         url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire&start='+str(i)
         r = requests.get(url)
@@ -104,8 +101,6 @@ while i<20: # change to searchLimit when not testing
     i+=10
 
 
-# calculated "scrape rate"
-
 newList = [list(x[0:2]) for x in csvList]
 noReps = [x for x,_ in itertools.groupby(newList)]
 
@@ -117,14 +112,23 @@ else:
     
 scrapeRate = '%.3f'%round(scrapeRate,3)
 
-stats = str(scrapeRate)
-print stats,'% scrape rate-- Actual'
+print 'SCRAPE RATES:'
+print
+stats = str(scrapeRate)+'% scrape rate'
+print stats,'— Actual'
 
 testStats = '%.3f'%round(float(len(noReps))/len(testList)*100)
-print str(testStats)+'% scrape rate -- Test'
+print str(testStats)+'% scrape rate — Test'
 
-
-# non-scraped data
+nonScraped = []
 newList = [i[0:2] for i in csvList]
+print 'NON-SCRAPED DATA'
+print
 for x in testList:
-    print x if x[0:2] not in newList else None
+    if x[0:2] not in newList:
+        nonScraped.append([x])
+        print x
+    else:
+        pass
+print 
+print len(nonScraped), 'out of', len(noReps)
