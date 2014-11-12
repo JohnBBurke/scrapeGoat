@@ -91,7 +91,7 @@ while i<10: # change to searchLimit when not testing
                             writeCsv()
                 for this in contactData:
                     if re.search(regNum,this.text):
-                        number = re.findall(regNum,this.text)[0]
+                        number = re.findall(altRegNum,this.text)[0]
                         # print firmName,jobTitle,jobCity,jobState,number
                         writeCsv()
             except:
