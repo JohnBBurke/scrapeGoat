@@ -115,10 +115,10 @@ scrapeRate = '%.3f'%round(scrapeRate,3)
 print 'SCRAPE RATES:'
 print
 stats = str(scrapeRate)+'% scrape rate'
-print stats,'— Actual'
+print stats,'-- Actual'
 
 testStats = '%.3f'%round(float(len(noReps))/len(testList)*100)
-print str(testStats)+'% scrape rate — Test'
+print str(testStats)+'% scrape rate -- Test'
 
 nonScraped = []
 newList = [i[0:2] for i in csvList]
