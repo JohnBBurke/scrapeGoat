@@ -124,8 +124,7 @@ print
 
 nonScraped = []
 newList = [i[0:2] for i in csvList]
-print 'NON-SCRAPED DATA'
-print
+print 'NON-SCRAPED DATA:'
 for x in testList:
     if x[0:2] not in newList:
         nonScraped.append([x])
