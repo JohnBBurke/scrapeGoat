@@ -20,7 +20,7 @@ def try_int(x):
     
 def writeCsv():
     csvList.append([firmName,jobTitle,jobCity,jobState,number])
-    with open(directory+what.upper()+where+'.csv','w') as f:
+    with open(directory+'/'+what.upper()+where+'.csv','w') as f:
         writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
         [writer.writerow(row) for row in csvList]
         
@@ -99,7 +99,7 @@ while i<10: # change to searchLimit when not testing
         print e
         pass
     i+=10
-
+print
 
 newList = [list(x[0:2]) for x in csvList]
 noReps = [x for x,_ in itertools.groupby(newList)]
@@ -119,6 +119,7 @@ print stats,'-- Actual'
 
 testStats = '%.3f'%round(float(len(noReps))/len(testList)*100)
 print str(testStats)+'% scrape rate -- Test'
+print
 
 nonScraped = []
 newList = [i[0:2] for i in csvList]
