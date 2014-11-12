@@ -70,28 +70,28 @@ while i<10: # change to searchLimit when not testing
                     if re.search(altRegNum,z.text):
                         if len(z)>1:
                             number = re.findall(altRegNum,z.text)[0]
-                            print firmName,jobTitle,jobCity,jobState,number
+                            # print firmName,jobTitle,jobCity,jobState,number
                             writeCsv()
                         else:
                             number = re.findall(altRegNum,z.text)[0]
-                            print firmName,jobTitle,jobCity,jobState,number
+                            # print firmName,jobTitle,jobCity,jobState,number
                             writeCsv()
                 for q in altaltContactData:
                     if not contactData:
                         if re.search(regNum,q.text):
                             number = re.findall(altRegNum,q.text)[0]
-                            print firmName,jobTitle,jobCity,jobState,number
+                            # print firmName,jobTitle,jobCity,jobState,number
                             writeCsv()
                 for num in moreSoup:
                     if not contactData:
                         if not altContactData:
                             number = re.findall(altRegNum,moreSoup.text)[0]
-                            print firmName,jobTitle,jobCity,jobState,number
+                            # print firmName,jobTitle,jobCity,jobState,number
                             writeCsv()
                 for this in contactData:
                     if re.search(regNum,this.text):
                         number = re.findall(regNum,this.text)[0]
-                        print firmName,jobTitle,jobCity,jobState,number
+                        # print firmName,jobTitle,jobCity,jobState,number
                         writeCsv()
             except:
                 pass
