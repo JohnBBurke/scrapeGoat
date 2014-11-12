@@ -129,10 +129,12 @@ print
 for x in testList:
     if x[0:2] not in newList:
         nonScraped.append([x])
-        print x
+        # print x
     else:
         pass
 print 
 print len(nonScraped), 'out of', len(noReps)
+print
 
 print what.upper()+where+'.csv','is ready in',directory
+print
