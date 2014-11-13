@@ -4,14 +4,20 @@ from bs4 import BeautifulSoup
 import json
 import csv
 import itertools
+import time
 
-print
+print '\n\n\n\n\n'
 directory = raw_input('what directory? ')
 print
 what = raw_input('what: ')
 print 
 where = raw_input('where: ')
-print 
+print '\n\n\n\n\n'
+time.sleep(1)
+print 'your request is processing....'
+# directory = '/Users/macuser'
+# what = 'daycare'
+# where = 'nashville'
 
 def try_int(x):
     try:
@@ -41,7 +47,7 @@ searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 i = 0
 testList = []
 csvList = []
-while i<10: # change to searchLimit when not testing
+while i<searchLimit: # change to searchLimit when not testing
     try:
         url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire&start='+str(i)
         r = requests.get(url)
@@ -51,13 +57,17 @@ while i<10: # change to searchLimit when not testing
             try:
                 firmInfo = [getInfo('span','class','company'),
                             getInfo('a','target','_blank'),
-                            getInfo('span','class','location')]
+                            getInfo('span','class','location').strip()]
                 firmName,jobTitle,jobCityState = firmInfo
-                jobCityState = re.sub('[0-9]*','',jobCityState).strip()
-                jobCityState = re.sub('\(.*\)','',jobCityState).strip()
-                jobCity = jobCityState[0:-4].encode('utf-8')
-                jobState = jobCityState[-2:].encode('utf-8')
-                jobCityPlus = re.sub(', ','+',jobCity)
+                if jobCityState != 'United States':
+                    jobCityState = re.sub('[0-9]*','',jobCityState).strip()
+                    jobCityState = re.sub('\(.*\)','',jobCityState).strip()
+                    jobCity = jobCityState[0:-4].encode('utf-8')
+                    jobState = jobCityState[-2:].encode('utf-8')
+                    jobCityPlus = re.sub(', ','+',jobCity)
+                else:
+                    jobCity = 'United States'
+                    jobState = ''
                 firmNamePlus = re.sub("\'",'',firmName)
                 firmNamePlus = re.sub('\W','+',firmName)+'+'
                 bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState # try just jobCityState and compare     
@@ -69,30 +79,26 @@ while i<10: # change to searchLimit when not testing
                 testList.append([firmName,jobTitle,jobCity,jobState])
                 for z in altContactData:
                     if re.search(altRegNum,z.text):
-                        if len(z)>1:
-                            number = re.findall(altRegNum,z.text)[0]
-                            # print firmName,jobTitle,jobCity,jobState,number
-                            writeCsv()
-                        else:
-                            number = re.findall(altRegNum,z.text)[0]
-                            # print firmName,jobTitle,jobCity,jobState,number
-                            writeCsv()
+                        number = re.findall(altRegNum,z.text)[0]
+#                         print firmName,jobTitle,jobCity,jobState,number
+                        writeCsv()
                 for q in altaltContactData:
                     if not contactData:
-                        if re.search(regNum,q.text):
-                            number = re.findall(altRegNum,q.text)[0]
-                            # print firmName,jobTitle,jobCity,jobState,number
-                            writeCsv()
+                        if not altContactData:
+                            if re.search(regNum,q.text):
+                                number = re.findall(altRegNum,q.text)[0]
+#                                 print firmName,jobTitle,jobCity,jobState,number
+                                writeCsv()
                 for num in moreSoup:
                     if not contactData:
                         if not altContactData:
                             number = re.findall(altRegNum,moreSoup.text)[0]
-                            # print firmName,jobTitle,jobCity,jobState,number
+#                             print firmName,jobTitle,jobCity,jobState,number
                             writeCsv()
                 for this in contactData:
                     if re.search(regNum,this.text):
                         number = re.findall(altRegNum,this.text)[0]
-                        # print firmName,jobTitle,jobCity,jobState,number
+#                         print firmName,jobTitle,jobCity,jobState,number
                         writeCsv()
             except:
                 pass
@@ -100,7 +106,6 @@ while i<10: # change to searchLimit when not testing
         print e
         pass
     i+=10
-print
 
 newList = [list(x[0:2]) for x in csvList]
 noReps = [x for x,_ in itertools.groupby(newList)]
@@ -111,29 +116,47 @@ if limit[5]>=1000:
 else:
     scrapeRate = float(len(noReps))/(limit[5]-10)*100
     
-scrapeRate = '%.3f'%round(scrapeRate,3)
+scrapeRateStat = '%.3f'%round(scrapeRate,3)
 
+print '\n\n\n\n\n\n\n'
 print 'SCRAPE RATES:'
 print
-stats = str(scrapeRate)+'% scrape rate'
-print stats,'-- Actual'
+stats = str(scrapeRateStat)+'% scrape rate'
+print stats,#'-- Actual'
 
-testStats = '%.3f'%round(float(len(noReps))/len(testList)*100)
-print str(testStats)+'% scrape rate -- Test'
+testStats = '%.3f'%(float(len(noReps))/len(testList)*100)
+# print str(testStats)+'% scrape rate -- Test'
 print
 
 nonScraped = []
 newList = [i[0:2] for i in csvList]
-print 'NON-SCRAPED DATA:'
-for x in testList:
-    if x[0:2] not in newList:
-        nonScraped.append([x])
-        print x
-    else:
-        pass
-print 
-print len(nonScraped), 'out of', len(testList),'were not captured'
+# print 'NON-SCRAPED DATA:'
 print
 
-print what.upper()+where+'.csv','is ready in',directory
-print
+seeNonScrapedData = raw_input('Want to see non-scraped data? y/n: ')
+time.sleep(1)
+if seeNonScrapedData == 'y':
+    print
+    for x in testList:
+        if x[0:2] not in newList:
+            nonScraped.append([x])
+            with open(directory+'/NON-scraped.csv','w') as f:
+                writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+                [writer.writerow(row) for row in nonScraped]
+            print '\n\n\n'
+        else:
+            pass
+    print 'NON-scraped.csv is ready in ',directory+'\n'
+    print what.upper()+where+'.csv','is ready in',directory+'\n'
+    print len(nonScraped),'out of',len(testList), 'were NOT scraped\n\n\n'
+
+else:
+    for x in testList:
+        if x[0:2] not in newList:
+            nonScraped.append([x])
+        else:
+            pass
+    print '\n\n\n\n\n\n\n\n\n\n\n'
+    print len(nonScraped),'out of',len(testList), 'were NOT scraped\n'
+    print what.upper()+where+'.csv','is ready in',directory
+    print '\n\n'
