@@ -5,16 +5,37 @@ import json
 import csv
 import itertools
 import time
+import os
+from os.path import expanduser
+
+home = expanduser("~")
+desktop = home+'/Desktop'
+desktopCheck = os.path.isdir(home+"/Desktop")
+directory = desktop if desktopCheck is True else home   
+
 
 print '\n\n\n\n\n'
-directory = raw_input('what directory? ')
-print
 what = raw_input('what: ')
 print 
 where = raw_input('where: ')
+print 
+keywords = raw_input('keywords: ')
+print
+jobType = raw_input('job type: ')
+print
+salary = raw_input('salary or salary range: ')
+print
+fromage = raw_input('''jobs published how long ago: \n\n \"any\" for anytime,
+ \"15\" past 15 days, 
+ \"7\" for past 7 days, 
+ \"3\" for past 3 days,
+ \"1\" yesterday\'s results \n\n''')
 print '\n\n\n\n\n'
-time.sleep(1)
+
+time.sleep(.5)
 print 'your request is processing....'
+
+
 # directory = '/Users/macuser'
 # what = 'daycare'
 # where = 'nashville'
@@ -36,7 +57,7 @@ getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
 regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
 altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
-url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire'
+url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
 r = requests.get(url)
 soup = BeautifulSoup(r.content)
 limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
@@ -47,7 +68,7 @@ searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 i = 0
 testList = []
 csvList = []
-while i<searchLimit: # change to searchLimit when not testing
+while i<10: # change to searchLimit when not testing
     try:
         url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire&start='+str(i)
         r = requests.get(url)
@@ -111,14 +132,14 @@ newList = [list(x[0:2]) for x in csvList]
 noReps = [x for x,_ in itertools.groupby(newList)]
 
 if limit[5]>=1000:
-    scrapeRate = float(len(noReps))/searchLimit*100
+    scrapeRate = float(len(noReps))/len(testList)*100
 
 else:
-    scrapeRate = float(len(noReps))/(limit[5]-10)*100
+    scrapeRate = float(len(noReps))/len(testList)*100
     
 scrapeRateStat = '%.3f'%round(scrapeRate,3)
 
-print '\n\n\n\n\n\n\n'
+print '\n\n\n\n\n'
 print 'SCRAPE RATES:'
 print
 stats = str(scrapeRateStat)+'% scrape rate'
@@ -134,19 +155,19 @@ newList = [i[0:2] for i in csvList]
 print
 
 seeNonScrapedData = raw_input('Want to see non-scraped data? y/n: ')
-time.sleep(1)
+time.sleep(.5)
 if seeNonScrapedData == 'y':
     print
     for x in testList:
         if x[0:2] not in newList:
             nonScraped.append([x])
-            with open(directory+'/NON-scraped.csv','w') as f:
+            with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
                 writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                 [writer.writerow(row) for row in nonScraped]
-            print '\n\n\n'
+            print '\n\n\n\n\n'
         else:
             pass
-    print 'NON-scraped.csv is ready in ',directory+'\n'
+    print 'NON-scraped'+what.upper()+where+'.csv is ready in ',directory+'\n'
     print what.upper()+where+'.csv','is ready in',directory+'\n'
     print len(nonScraped),'out of',len(testList), 'were NOT scraped\n\n\n'
 
@@ -156,7 +177,7 @@ else:
             nonScraped.append([x])
         else:
             pass
-    print '\n\n\n\n\n\n\n\n\n\n\n'
+    print '\n\n\n'
     print len(nonScraped),'out of',len(testList), 'were NOT scraped\n'
     print what.upper()+where+'.csv','is ready in',directory
     print '\n\n'
