@@ -1,3 +1,19 @@
+'''
+To commit edited files: 
+
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin <project url>
+git push -f origin master
+
+To get and run code: 
+
+git clone <project url>
+cd scrapeGoat
+python indeed.py
+'''
+
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -35,11 +51,6 @@ print '\n\n\n\n\n'
 time.sleep(.5)
 print 'your request is processing....'
 
-
-# directory = '/Users/macuser'
-# what = 'daycare'
-# where = 'nashville'
-
 def try_int(x):
     try:
         return int(x)
@@ -68,7 +79,7 @@ searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 i = 0
 testList = []
 csvList = []
-while i<10: # change to searchLimit when not testing
+while i<searchLimit: # change to searchLimit when not testing
     try:
         url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire&start='+str(i)
         r = requests.get(url)
