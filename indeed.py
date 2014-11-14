@@ -3,13 +3,13 @@ To commit edited files:
 
 git init
 git add .
-git commit -m "Initial commit"
-git remote add origin <project url>
+git commit -m "Updated commit"
+git remote add origin https://github.com/tmthyjames/scrapeGoat.git
 git push -f origin master
 
 To get and run code: 
 
-git clone <project url>
+git clone https://github.com/tmthyjames/scrapeGoat.git
 cd scrapeGoat
 python indeed.py
 '''
