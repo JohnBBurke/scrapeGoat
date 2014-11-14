@@ -1,19 +1,3 @@
-'''
-To commit edited files: 
-
-git init
-git add .
-git commit -m "Updated commit"
-git remote add origin https://github.com/tmthyjames/scrapeGoat.git
-git push -f origin master
-
-To get and run code: 
-
-git clone https://github.com/tmthyjames/scrapeGoat.git
-cd scrapeGoat
-python indeed.py
-'''
-
 import re
 import requests
 from bs4 import BeautifulSoup
