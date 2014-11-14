@@ -1,35 +1,66 @@
 import re
 import requests
 from bs4 import BeautifulSoup
-import json
+# import json
 import csv
 import itertools
 import time
 import os
 from os.path import expanduser
+import sys
 
 home = expanduser("~")
 desktop = home+'/Desktop'
 desktopCheck = os.path.isdir(home+"/Desktop")
 directory = desktop if desktopCheck is True else home   
 
-
 print '\n\n\n\n\n'
 what = raw_input('what: ')
-print 
+print
 where = raw_input('where: ')
-print 
+print
 keywords = raw_input('keywords: ')
 print
-jobType = raw_input('job type: ')
+title = raw_input('specific title: ')
 print
-salary = raw_input('salary or salary range: ')
+specificFirm = raw_input('specific comapny: ')
 print
-fromage = raw_input('''jobs published how long ago: \n\n \"any\" for anytime,
- \"15\" past 15 days, 
- \"7\" for past 7 days, 
- \"3\" for past 3 days,
- \"1\" yesterday\'s results \n\n''')
+jobType = raw_input('''job type: \n\n 
+all job types\nfull-time\npart-time\ncontract\ninternship\ntemporary\n\n''')
+print
+salary = raw_input('salary or salary range: \nFor example: \"$50,000\" or \"$40K-$90K\"\n\n')
+print
+fromage = raw_input('''jobs published how long ago: \n\"any\" for anytime,
+\"15\" past 15 days, 
+\"7\" for past 7 days, 
+\"3\" for past 3 days
+\"1\" results since yesterday \n\n''')
+
+if re.search('all',jobType,flags=re.IGNORECASE):
+    jobType = 'all'
+elif re.search('full',jobType,flags=re.IGNORECASE):
+    jobType = 'fulltime'
+elif re.search('part',jobType,flags=re.IGNORECASE):
+    jobType = 'parttime'
+elif re.search('con',jobType,flags=re.IGNORECASE):
+    jobType = 'contract'
+elif re.search('intern',jobType,flags=re.IGNORECASE):
+    jobType = 'internship'
+elif re.search('temp',jobType,flags=re.IGNORECASE):
+    jobType = 'temporary'
+    
+if re.search('any|all',fromage,flags=re.IGNORECASE):
+    fromage = 'any'
+elif re.search('15|fif',fromage,flags=re.IGNORECASE):
+    fromage = '15'
+elif re.search('7|sev',fromage,flags=re.IGNORECASE):
+    fromage = '7'
+elif re.search('3|thre',fromage,flags=re.IGNORECASE):
+    fromage = '3'
+elif re.search('1|one|yes',fromage,flags=re.IGNORECASE):
+    fromage = '1'
+elif re.search('last|sin',fromage,flags=re.IGNORECASE):
+    fromage = 'last'
 print '\n\n\n\n\n'
 
 time.sleep(.5)
@@ -55,7 +86,12 @@ altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.
 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
 r = requests.get(url)
 soup = BeautifulSoup(r.content)
-limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
+try:
+    limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
+except:
+    sys.exit("\n\nINDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+
+
 limit = [re.sub(',','',str(x)) for x in limit]
 limit = [try_int(x) for x in limit] 
 searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
@@ -93,6 +129,14 @@ while i<searchLimit: # change to searchLimit when not testing
                 altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                 altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                 testList.append([firmName,jobTitle,jobCity,jobState])
+                # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                #     source = 'http://www.indeed.com'+link.get('href')
+                #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                #     payload = {'longUrl': source}
+                #     headers = {'content-type':'application/json'}
+                #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                #     text = r.content
+                #     site = str(json.loads(text)['id'])
                 for z in altContactData:
                     if re.search(altRegNum,z.text):
                         number = re.findall(altRegNum,z.text)[0]
@@ -159,7 +203,7 @@ if seeNonScrapedData == 'y':
             with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
                 writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                 [writer.writerow(row) for row in nonScraped]
-            print '\n\n\n\n\n'
+            print '\n\n\n'
         else:
             pass
     print 'NON-scraped'+what.upper()+where+'.csv is ready in ',directory+'\n'
@@ -176,3 +220,5 @@ else:
     print len(nonScraped),'out of',len(testList), 'were NOT scraped\n'
     print what.upper()+where+'.csv','is ready in',directory
     print '\n\n'
+
+
