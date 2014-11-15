@@ -61,7 +61,7 @@ elif re.search('1|one|yes',fromage,flags=re.IGNORECASE):
     fromage = '1'
 elif re.search('last|sin',fromage,flags=re.IGNORECASE):
     fromage = 'last'
-print '\n\n\n\n\n'
+print '\n\n\n'
 
 time.sleep(.5)
 print 'your request is processing....'
@@ -89,6 +89,7 @@ soup = BeautifulSoup(r.content)
 try:
     limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
 except:
+    time.sleep(1)
     sys.exit("\n\nINDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
 
 
@@ -203,7 +204,7 @@ if seeNonScrapedData == 'y':
             with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
                 writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                 [writer.writerow(row) for row in nonScraped]
-            print '\n\n\n'
+            print '\n'
         else:
             pass
     print 'NON-scraped'+what.upper()+where+'.csv is ready in ',directory+'\n'
@@ -216,9 +217,9 @@ else:
             nonScraped.append([x])
         else:
             pass
-    print '\n\n\n'
+    print '\n'
     print len(nonScraped),'out of',len(testList), 'were NOT scraped\n'
     print what.upper()+where+'.csv','is ready in',directory
-    print '\n\n'
+    print '\n'
 
 
