@@ -1,4 +1,3 @@
-"""hi ally cat watson"""
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -21,7 +20,7 @@ print
 where = raw_input('where: ')
 print
 keywords = raw_input('keywords: ')
-print
+
 title = raw_input('specific title: ')
 print
 specificFirm = raw_input('specific comapny: ')
