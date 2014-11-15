@@ -66,11 +66,11 @@ print '\n\n\n'
 time.sleep(.5)
 print 'your request is processing....'
 
-def try_int(x):
-    try:
-        return int(x)
-    except ValueError:
-        pass
+# def try_int(x):
+#     try:
+#         return int(x)
+#     except ValueError:
+#         pass
     
 def writeCsv():
     csvList.append([firmName,jobTitle,jobCity,jobState,number])
@@ -79,6 +79,7 @@ def writeCsv():
         [writer.writerow(row) for row in csvList]
         
 getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
+intgr = lambda x: int(x) if x.isdigit() else x
 
 regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
 altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
@@ -92,9 +93,10 @@ except:
     time.sleep(1)
     sys.exit("\n\nINDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
 
-
+# limit = [re.sub(',','',str(x)) for x in limit]
+# limit = [try_int(x) for x in limit] 
 limit = [re.sub(',','',str(x)) for x in limit]
-limit = [try_int(x) for x in limit] 
+limit = [intgr(x) for x in limit]
 searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 
 i = 0
