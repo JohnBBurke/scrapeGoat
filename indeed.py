@@ -9,7 +9,7 @@ git push -f origin master
 import re
 import requests
 from bs4 import BeautifulSoup
-import json
+# import json
 import csv
 import itertools
 import time
