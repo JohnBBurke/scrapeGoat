@@ -31,18 +31,18 @@ keywords = raw_input('keywords: ')
 print
 title = raw_input('specific title: ')
 print
-specificFirm = raw_input('specific comapny: ')
+specificFirm = raw_input('specific company: ')
 print
-jobType = raw_input('''job type: \n\n 
-all job types\nfull-time\npart-time\ncontract\ninternship\ntemporary\n\n''')
-print
-salary = raw_input('salary or salary range: \nFor example: \"$50,000\" or \"$40K-$90K\"\n\n')
-print
+jobType = raw_input('''job type: \n 
+all job types\nfull-time\npart-time\ncontract\ninternship\ntemporary\n''')
+
+salary = raw_input('salary or salary range: \nFor example: \"$50,000\" or \"$40K-$90K\"\n')
+
 fromage = raw_input('''jobs published how long ago: \n\"any\" for anytime,
 \"15\" past 15 days, 
 \"7\" for past 7 days, 
 \"3\" for past 3 days
-\"1\" results since yesterday \n\n''')
+\"1\" results since yesterday \n''')
 
 if re.search('all',jobType,flags=re.IGNORECASE):
     jobType = 'all'
@@ -112,7 +112,7 @@ testList = []
 csvList = []
 while i<searchLimit: # change to searchLimit when not testing
     try:
-        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&r=directhire&start='+str(i)
+        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
         gData = soup.find_all('div',{'class':'row'})
@@ -189,7 +189,7 @@ else:
     
 scrapeRateStat = '%.3f'%round(scrapeRate,3)
 
-print '\n\n\n\n\n'
+print '\n\n'
 print 'SCRAPE RATES:'
 print
 stats = str(scrapeRateStat)+'% scrape rate'
@@ -219,7 +219,7 @@ if seeNonScrapedData == 'y':
             pass
     print 'NON-scraped'+what.upper()+where+'.csv is ready in ',directory+'\n'
     print what.upper()+where+'.csv','is ready in',directory+'\n'
-    print len(nonScraped),'out of',len(testList), 'were NOT scraped\n\n\n'
+    print len(nonScraped),'out of',len(testList), 'were NOT scraped\n\n'
 
 else:
     for x in testList:
