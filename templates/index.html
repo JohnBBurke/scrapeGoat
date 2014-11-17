@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/static/style.css" />
+		<link rel="shortcut icon" href="http://icons-watermarks.s3.amazonaws.com/simple-light-gray/alphanum/alphanum_lowercase-letter-r/alphanum_lowercase-letter-r_simple-light-gray_512x512.png">
+		<title>relode</title>
+	</head>
+	<body>
+		<h2>indeed scraper</h2>
+		<p>search criteria:</p>
+		<form action="/" method="post">
+			<label for="what">what</label>
+			<input type="text" name="what" /></p>
+			<label for="where">where</label>
+			<input type="text" name="where" /></p>
+				<n>job types</n>
+				<select id="jt" name="jt" style="cursor:pointer">
+					<option value="all">all job types</option>
+					<option value="fulltime">full-time</option>
+					<option value="parttime">part-time</option>
+					<option value="contract">contract</option>
+					<option value="internship">internship</option>
+					<option value="temporary">temporary</option>
+				</select>
+				<tr id="sal_item">
+					<td class="col_a" style="vertical-align:top">
+						<!-- <label for="salary">salary extimate</label> -->
+					</td>
+					<td>
+						<table cellpadding="0" cellspacing="0">
+							<tbody>
+								<tr>
+									<td>
+										<input type="text" id="salary" name="salary" value size="17" />
+										<n>per year</n><span class="example" style="font-size:smaller;color:#666"> $50,000 or $40K-$90K</span>
+										<tr>
+											<td style="padding:5px 3px;" colspan="2" nowrap>
+												<n>age - </n>
+												<label for="fromage">jobs published</label>
+												<select id="fromage" name="fromage" style="cursor:pointer">
+													<option value="any">anytime</option>
+													<option value="15">within 15 days</option>
+													<option value="7">within 7 days</option>
+													<option value="3">within 3 days</option>
+													<option value="1">yesterday</option>
+													<option value="last">since my last visit</option>
+												</select>
+											</td>
+										</tr>
+									</td>
+								</tr>
+								<tr>
+									<td>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<input type="submit" value="submit" style="cursor:pointer" /></p>
+		</form>
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				search results:
+				<pre>
+					{% for message in messages %}
+{{message}}
+					{% endfor %}
+				</pre>
+			{% endif %}
+		{% endwith %}
+	</body>
+</html>
