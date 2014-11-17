@@ -36,7 +36,7 @@ print
 jobType = raw_input('''job type: \n 
 all job types\nfull-time\npart-time\ncontract\ninternship\ntemporary\n''')
 
-salary = raw_input('salary or salary range: \nFor example: \"$50,000\" or \"$40K-$90K\"\n')
+salary = raw_input('salary or salary range: \nfor example: \"$50,000\" or \"$40K-$90K\"\n')
 
 fromage = raw_input('''jobs published how long ago: \n\"any\" for anytime,
 \"15\" past 15 days, 
