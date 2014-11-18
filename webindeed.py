@@ -41,7 +41,7 @@ class View(flask.views.MethodView):
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
         def writeCsv():
-            csvList.append([firmName,jobTitle,jobCity,jobState,number])
+            csvList.append([firmName,jobTitle,jobCity,jobState,number,site])
             # with open(directory+'/'+what.upper()+where+'.csv','w') as f:
             #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
             #     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER'])
@@ -65,7 +65,7 @@ class View(flask.views.MethodView):
         i = 0
         testList = []
         csvList = []
-        while i<10: # change to searchLimit when not testing
+        while i<searchLimit: # change to searchLimit when not testing
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
@@ -99,14 +99,14 @@ class View(flask.views.MethodView):
                         # jobTitle = re.sub(',','',jobTitle)
                         # jobCity = re.sub(',','',jobCity)
                         # jobState = re.sub(',','',jobState)
-                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                        #     source = 'http://www.indeed.com'+link.get('href')
-                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                        #     payload = {'longUrl': source}
-                        #     headers = {'content-type':'application/json'}
-                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                        #     text = r.content
-                        #     site = str(json.loads(text)['id'])
+                        for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                            source = 'http://www.indeed.com'+link.get('href')
+                            post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                            payload = {'longUrl': source}
+                            headers = {'content-type':'application/json'}
+                            r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                            text = r.content
+                            site = str(json.loads(text)['id'])
                         for z in altContactData:
                             if re.search(altRegNum,z.text):
                                 number = re.findall(altRegNum,z.text)[0].encode('utf-8')
