@@ -7,4 +7,4 @@ indeed.py can be run from the command line:
 
 python indeed.py
 
-wenindeed.py can be run from the web.
+webindeed.py can be run from the web.
