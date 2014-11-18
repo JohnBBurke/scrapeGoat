@@ -3,7 +3,7 @@ import flask, flask.views
 import re
 import requests
 from bs4 import BeautifulSoup
-import json
+# import json
 import csv
 import itertools
 import os
@@ -16,7 +16,7 @@ import io
 }
 
 app = flask.Flask(__name__)
-app.secret_key = 'randomKey'
+app.secret_key = os.urandom(32)
 
 home = expanduser("~")
 desktop = home+'/Desktop'
@@ -42,10 +42,6 @@ class View(flask.views.MethodView):
 
         def writeCsv():
             csvList.append([firmName,jobTitle,jobCity,jobState,number])
-            # with open(directory+'/'+what.upper()+where+'.csv','w') as f:
-            #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-            #     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER'])
-            #     [writer.writerow(row) for row in csvList]
                 
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
@@ -53,10 +49,12 @@ class View(flask.views.MethodView):
         url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
+
         try:
             limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
         except:
-            sys.exit("\n\nINDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+            flask.flash("INDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+            return self.get()
 
         limit = [re.sub(',','',str(x)) for x in limit]
         limit = [intgr(x) for x in limit]
@@ -88,7 +86,7 @@ class View(flask.views.MethodView):
                             jobState = ''
                         firmNamePlus = re.sub("\'",'',firmName)
                         firmNamePlus = re.sub('\W','+',firmName)+'+'
-                        bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState # try just jobCityState and compare     
+                        bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState     
                         info = requests.get(bingSearch)
                         moreSoup = BeautifulSoup(info.content)
                         contactData = moreSoup.find_all('div',{'class':"b_factrow"})
@@ -96,6 +94,7 @@ class View(flask.views.MethodView):
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                         testList.append([firmName,jobTitle,jobCity,jobState])
                       
+                        # creates short link for each job posting
                         # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
                         #     source = 'http://www.indeed.com'+link.get('href')
                         #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
@@ -104,28 +103,25 @@ class View(flask.views.MethodView):
                         #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
                         #     text = r.content
                         #     site = str(json.loads(text)['id'])
+
                         for z in altContactData:
                             if re.search(altRegNum,z.text):
                                 number = re.findall(altRegNum,z.text)[0].encode('utf-8')
-                                number = re.sub(',','',number)
                                 writeCsv()
                         for q in altaltContactData:
                             if not contactData:
                                 if not altContactData:
                                     if re.search(regNum,q.text):
                                         number = re.findall(altRegNum,q.text)[0].encode('utf-8')
-                                        number = re.sub(',','',number)
                                         writeCsv()
                         for num in moreSoup:
                             if not contactData:
                                 if not altContactData:
                                     number = re.findall(altRegNum,moreSoup.text)[0].encode('utf-8')
-                                    number = re.sub(',','',number)
                                     writeCsv()
                         for this in contactData:
                             if re.search(regNum,this.text):
                                 number = re.findall(altRegNum,this.text)[0].encode('utf-8')
-                                number = re.sub(',','',number)
                                 writeCsv()
                     except:
                         pass
@@ -133,6 +129,13 @@ class View(flask.views.MethodView):
                 print e
                 pass
             i+=10
+
+        si = io.BytesIO()
+        cw = csv.writer(si)
+        [cw.writerow(row) for row in csvList]
+        output = make_response("Firm Name,Job Title,Job City,Job State,Number,"+'\n'+si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
+        output.headers["Content-type"] = "text/csv"
 
         newList = [list(x[0:2]) for x in csvList]
         noReps = [x for x,_ in itertools.groupby(newList)]
@@ -174,15 +177,7 @@ class View(flask.views.MethodView):
             else:
                 pass
 
-        si = io.BytesIO()
-        cw = csv.writer(si)
-        for row in csvList:
-            cw.writerow(row)
-        output = make_response("Firm Name,Job Title,Job City,Job State,Number,"+'\n'+si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
-        output.headers["Content-type"] = "text/csv"
         return output
-        return self.get()
 
 
 app.add_url_rule('/',
@@ -190,4 +185,4 @@ app.add_url_rule('/',
                 methods=['GET','POST'])
 
 app.debug = True
-app.run(host='0.0.0.0')
+app.run()
