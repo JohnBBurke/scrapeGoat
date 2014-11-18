@@ -1,11 +1,3 @@
-''' 
-git init
-git add .
-git commit -m "the end is nye"
-git remote add origin "https://github.com/thmthyjames/scrapeGoat.git"
-git push -f origin master
-'''
-
 import re
 import requests
 from bs4 import BeautifulSoup
