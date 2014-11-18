@@ -1,15 +1,15 @@
-from flask import request, make_response
+from flask import request, make_response, session
 import flask, flask.views
-import re
-import requests
+from datetime import timedelta
 from bs4 import BeautifulSoup
-# import json
-import csv
-import itertools
-import os
 from os.path import expanduser
-import sys
+import os
+import csv
+import re
 import io
+import sys
+import itertools
+import requests
 
 {
     "detect_indentation": False
@@ -31,6 +31,9 @@ class View(flask.views.MethodView):
 
     @app.route('/download')
     def post(self):
+
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=30)
 
         what = flask.request.form['what']
         where = flask.request.form['where']
@@ -63,7 +66,7 @@ class View(flask.views.MethodView):
         i = 0
         testList = []
         csvList = []
-        while i<10:
+        while i<searchLimit:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
