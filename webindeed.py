@@ -41,7 +41,7 @@ class View(flask.views.MethodView):
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
         def writeCsv():
-            csvList.append([firmName,jobTitle,jobCity,jobState,number,site])
+            csvList.append([firmName,jobTitle,jobCity,jobState,number])
             # with open(directory+'/'+what.upper()+where+'.csv','w') as f:
             #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
             #     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER'])
@@ -65,7 +65,7 @@ class View(flask.views.MethodView):
         i = 0
         testList = []
         csvList = []
-        while i<searchLimit: # change to searchLimit when not testing
+        while i<10:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
@@ -95,23 +95,19 @@ class View(flask.views.MethodView):
                         altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                         testList.append([firmName,jobTitle,jobCity,jobState])
-                        # firmName = re.sub(',','',firmName)
-                        # jobTitle = re.sub(',','',jobTitle)
-                        # jobCity = re.sub(',','',jobCity)
-                        # jobState = re.sub(',','',jobState)
-                        for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                            source = 'http://www.indeed.com'+link.get('href')
-                            post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                            payload = {'longUrl': source}
-                            headers = {'content-type':'application/json'}
-                            r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                            text = r.content
-                            site = str(json.loads(text)['id'])
+                      
+                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                        #     source = 'http://www.indeed.com'+link.get('href')
+                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                        #     payload = {'longUrl': source}
+                        #     headers = {'content-type':'application/json'}
+                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                        #     text = r.content
+                        #     site = str(json.loads(text)['id'])
                         for z in altContactData:
                             if re.search(altRegNum,z.text):
                                 number = re.findall(altRegNum,z.text)[0].encode('utf-8')
                                 number = re.sub(',','',number)
-        #                         print firmName,jobTitle,jobCity,jobState,number
                                 writeCsv()
                         for q in altaltContactData:
                             if not contactData:
@@ -119,20 +115,17 @@ class View(flask.views.MethodView):
                                     if re.search(regNum,q.text):
                                         number = re.findall(altRegNum,q.text)[0].encode('utf-8')
                                         number = re.sub(',','',number)
-        #                                 print firmName,jobTitle,jobCity,jobState,number
                                         writeCsv()
                         for num in moreSoup:
                             if not contactData:
                                 if not altContactData:
                                     number = re.findall(altRegNum,moreSoup.text)[0].encode('utf-8')
                                     number = re.sub(',','',number)
-        #                             print firmName,jobTitle,jobCity,jobState,number
                                     writeCsv()
                         for this in contactData:
                             if re.search(regNum,this.text):
                                 number = re.findall(altRegNum,this.text)[0].encode('utf-8')
                                 number = re.sub(',','',number)
-        #                         print firmName,jobTitle,jobCity,jobState,number
                                 writeCsv()
                     except:
                         pass
@@ -181,7 +174,6 @@ class View(flask.views.MethodView):
             else:
                 pass
 
-
         si = io.BytesIO()
         cw = csv.writer(si)
         for row in csvList:
@@ -190,7 +182,7 @@ class View(flask.views.MethodView):
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
         return output
-        # return self.get()
+        return self.get()
 
 
 app.add_url_rule('/',
@@ -198,4 +190,4 @@ app.add_url_rule('/',
                 methods=['GET','POST'])
 
 app.debug = True
-app.run()
+app.run(host='0.0.0.0')
