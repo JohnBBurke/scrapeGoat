@@ -65,19 +65,16 @@ print '\n\n\n'
 
 time.sleep(.5)
 print 'your request is processing....'
-
-# def try_int(x):
-#     try:
-#         return int(x)
-#     except ValueError:
-#         pass
     
 def writeCsv():
-    csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch])
-    with open(directory+'/'+what.upper()+where+'.csv','w') as f:
-        writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-        writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
-        [writer.writerow(row) for row in csvList]
+    if not number:
+        pass
+    else:
+        csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch]) 
+        with open(directory+'/'+what.upper()+where+'.csv','w') as f:
+            writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+            writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
+            [writer.writerow(row) for row in csvList]
         
 getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
 intgr = lambda x: int(x) if x.isdigit() else x
@@ -94,8 +91,6 @@ except:
     time.sleep(1)
     sys.exit("\n\nINDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
 
-# limit = [re.sub(',','',str(x)) for x in limit]
-# limit = [try_int(x) for x in limit] 
 limit = [re.sub(',','',str(x)) for x in limit]
 limit = [intgr(x) for x in limit]
 searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
@@ -103,7 +98,7 @@ searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 i = 0
 testList = []
 csvList = []
-while i<searchLimit: # change to searchLimit when not testing
+while i<searchLimit:
     try:
         url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
         r = requests.get(url)
@@ -148,13 +143,10 @@ while i<searchLimit: # change to searchLimit when not testing
                 for n in nameSoup.find_all('li',{'class':'b_algo'}):
                     if re.search('^.* \|.*LinkedIn',n.text):
                         name = re.findall('^(.*) \|',n.text)[-1][0:-1].encode('utf-8').title()
-#                         name = re.search('((\w*)\s){2,3}',n.text) #[-1][0:-1].encode('utf-8')
-#                         name = name.group()[0:-1].encode('utf-8')
                         namesList.append(name)
                         names = str(namesList)
                         names = re.sub('(\')',' ',str(names))
                         names = names.translate(None,'\[\]').strip()
-                        # print name
                 for this in contactData:
                     if re.search(regNum,this.text):
                         number = re.findall(altRegNum,this.text)[0].encode('utf-8')

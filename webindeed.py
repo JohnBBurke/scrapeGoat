@@ -33,7 +33,7 @@ class View(flask.views.MethodView):
     def post(self):
 
         session.permanent = True
-        app.permanent_session_lifetime = timedelta(minutes=30)
+        app.permanent_session_lifetime = timedelta(minutes=45)
 
         what = flask.request.form['what']
         where = flask.request.form['where']
@@ -44,8 +44,14 @@ class View(flask.views.MethodView):
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
         def writeCsv():
-            csvList.append([firmName,jobTitle,jobCity,jobState,number])
-        # writeCsv = lambda : csvList.append([firmName,jobTitle,jobCity,jobState,number])
+            if not number:
+                pass
+            else:
+                csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch]) 
+                # with open(directory+'/'+what.upper()+where+'.csv','w') as f:
+                #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+                #     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
+                #     [writer.writerow(row) for row in csvList]
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
 
@@ -66,7 +72,7 @@ class View(flask.views.MethodView):
         i = 0
         testList = []
         csvList = []
-        while i<searchLimit:
+        while i<10:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
@@ -96,6 +102,15 @@ class View(flask.views.MethodView):
                         altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                         testList.append([firmName,jobTitle,jobCity,jobState])
+                        # creates short link for each job posting
+                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                            # source = 'http://www.indeed.com'+link.get('href')
+                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                        #     payload = {'longUrl': source}
+                        #     headers = {'content-type':'application/json'}
+                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                        #     text = r.content
+                        #     site = str(json.loads(text)['id'])
                         bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
                         nameReq = requests.get(bingNameSearch)
                         nameSoup = BeautifulSoup(nameReq.content)
@@ -103,8 +118,6 @@ class View(flask.views.MethodView):
                         for n in nameSoup.find_all('li',{'class':'b_algo'}):
                             if re.search('^.* \|.*LinkedIn',n.text):
                                 name = re.findall('^(.*) \|',n.text)[-1][0:-1].encode('utf-8').title()
-        #                         name = re.search('((\w*)\s){2,3}',n.text) #[-1][0:-1].encode('utf-8')
-        #                         name = name.group()[0:-1].encode('utf-8')
                                 namesList.append(name)
                                 names = str(namesList)
                                 names = re.sub('(\')',' ',str(names))
@@ -139,37 +152,6 @@ class View(flask.views.MethodView):
                                             for z in number:
                                                 number = z.encode('utf-8')
                                             writeCsv()
-                        # creates short link for each job posting
-                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                        #     source = 'http://www.indeed.com'+link.get('href')
-                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                        #     payload = {'longUrl': source}
-                        #     headers = {'content-type':'application/json'}
-                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                        #     text = r.content
-                        #     site = str(json.loads(text)['id'])
-
-                        # for z in altContactData:
-                        #     if re.search(altRegNum,z.text):
-                        #         number = re.findall(altRegNum,z.text)[0].encode('utf-8')
-                        #         writeCsv()
-                        # for q in altaltContactData:
-                        #     if not contactData:
-                        #         if not altContactData:
-                        #             if re.search(regNum,q.text):
-                        #                 number = re.findall(altRegNum,q.text)[0].encode('utf-8')
-                        #                 writeCsv()
-                        # for num in moreSoup:
-                        #     if not contactData:
-                        #         if not altContactData:
-                        #             number = re.findall(altRegNum,moreSoup.text)[0].encode('utf-8')
-                        #             writeCsv()
-                        # for this in contactData:
-                        #     if re.search(regNum,this.text):
-                        #         number = re.findall(altRegNum,this.text)[0].encode('utf-8')
-                        #         writeCsv()
-
-
                     except:
                         pass
             except Exception as e:
@@ -180,7 +162,7 @@ class View(flask.views.MethodView):
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("Firm Name,Job Title,Job City,Job State,Number,"+'\n'+si.getvalue())
+        output = make_response("Firm Name,Job Title,Job City,Job State,Number,Names,URL to LinkedIn Data"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
