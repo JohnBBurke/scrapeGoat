@@ -45,7 +45,7 @@ class View(flask.views.MethodView):
 
         def writeCsv():
             csvList.append([firmName,jobTitle,jobCity,jobState,number])
-                
+        # writeCsv = lambda : csvList.append([firmName,jobTitle,jobCity,jobState,number])
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
 
@@ -96,7 +96,49 @@ class View(flask.views.MethodView):
                         altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                         testList.append([firmName,jobTitle,jobCity,jobState])
-                      
+                        bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
+                        nameReq = requests.get(bingNameSearch)
+                        nameSoup = BeautifulSoup(nameReq.content)
+                        namesList = []
+                        for n in nameSoup.find_all('li',{'class':'b_algo'}):
+                            if re.search('^.* \|.*LinkedIn',n.text):
+                                name = re.findall('^(.*) \|',n.text)[-1][0:-1].encode('utf-8').title()
+        #                         name = re.search('((\w*)\s){2,3}',n.text) #[-1][0:-1].encode('utf-8')
+        #                         name = name.group()[0:-1].encode('utf-8')
+                                namesList.append(name)
+                                names = str(namesList)
+                                names = re.sub('(\')',' ',str(names))
+                                names = names.translate(None,'\[\]').strip()
+                                print name
+                        for this in contactData:
+                            if re.search(regNum,this.text):
+                                number = re.findall(altRegNum,this.text)[0].encode('utf-8')
+                                writeCsv()
+                        for z in altContactData:
+                            if not contactData:
+                                if re.search(altRegNum,z.text):
+                                    number = re.findall(altRegNum,z.text)[0].encode('utf-8')
+                                    writeCsv()
+                        for q in altaltContactData:
+                            if not contactData:
+                                if not altContactData:
+                                    if re.search(regNum,q.text):
+                                        number = re.findall(altRegNum,q.text)[0].encode('utf-8')
+                                        writeCsv()
+                        for num in moreSoup:
+                            if not contactData:
+                                if not altContactData:
+                                    if not altaltContactData:
+                                        if re.search(altRegNum,moreSoup.text):
+                                            number = re.findall(altRegNum,moreSoup.text)
+                                            for p in number:
+                                                number = p.encode('utf-8')
+                                            writeCsv()
+                                        else:
+                                            number = re.findall(altRegNum,str(num))
+                                            for z in number:
+                                                number = z.encode('utf-8')
+                                            writeCsv()
                         # creates short link for each job posting
                         # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
                         #     source = 'http://www.indeed.com'+link.get('href')
@@ -107,25 +149,27 @@ class View(flask.views.MethodView):
                         #     text = r.content
                         #     site = str(json.loads(text)['id'])
 
-                        for z in altContactData:
-                            if re.search(altRegNum,z.text):
-                                number = re.findall(altRegNum,z.text)[0].encode('utf-8')
-                                writeCsv()
-                        for q in altaltContactData:
-                            if not contactData:
-                                if not altContactData:
-                                    if re.search(regNum,q.text):
-                                        number = re.findall(altRegNum,q.text)[0].encode('utf-8')
-                                        writeCsv()
-                        for num in moreSoup:
-                            if not contactData:
-                                if not altContactData:
-                                    number = re.findall(altRegNum,moreSoup.text)[0].encode('utf-8')
-                                    writeCsv()
-                        for this in contactData:
-                            if re.search(regNum,this.text):
-                                number = re.findall(altRegNum,this.text)[0].encode('utf-8')
-                                writeCsv()
+                        # for z in altContactData:
+                        #     if re.search(altRegNum,z.text):
+                        #         number = re.findall(altRegNum,z.text)[0].encode('utf-8')
+                        #         writeCsv()
+                        # for q in altaltContactData:
+                        #     if not contactData:
+                        #         if not altContactData:
+                        #             if re.search(regNum,q.text):
+                        #                 number = re.findall(altRegNum,q.text)[0].encode('utf-8')
+                        #                 writeCsv()
+                        # for num in moreSoup:
+                        #     if not contactData:
+                        #         if not altContactData:
+                        #             number = re.findall(altRegNum,moreSoup.text)[0].encode('utf-8')
+                        #             writeCsv()
+                        # for this in contactData:
+                        #     if re.search(regNum,this.text):
+                        #         number = re.findall(altRegNum,this.text)[0].encode('utf-8')
+                        #         writeCsv()
+
+
                     except:
                         pass
             except Exception as e:
@@ -189,3 +233,4 @@ app.add_url_rule('/',
 
 app.debug = True
 app.run()
+
