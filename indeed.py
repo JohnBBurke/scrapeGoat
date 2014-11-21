@@ -142,7 +142,7 @@ while i<searchLimit:
                 namesList = []
                 for n in nameSoup.find_all('li',{'class':'b_algo'}):
                     if re.search('^.* \|.*LinkedIn',n.text):
-                        name = re.findall('^(.*) \|',n.text)[-1][0:-1].encode('utf-8').title()
+                        name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
                         namesList.append(name)
                         names = str(namesList)
                         names = re.sub('(\')',' ',str(names))

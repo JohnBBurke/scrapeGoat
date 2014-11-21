@@ -40,18 +40,28 @@ class View(flask.views.MethodView):
         jobType = flask.request.form['jt']
         salary = flask.request.form['salary']
         fromage = flask.request.form['fromage']
+
         regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
+        regex1 = re.compile(r'^[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
+
+        def reformatNumber(x,y):
+            if re.search(x,y):
+                z = '(' + y[0:3] +')'+y[3:]
+                z = re.sub('\)\.',') ',z)
+                z = re.sub('\.','-',z)
+                y = z
 
         def writeCsv():
             if not number:
                 pass
             else:
                 csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch]) 
-                # with open(directory+'/'+what.upper()+where+'.csv','w') as f:
-                #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                #     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
-                #     [writer.writerow(row) for row in csvList]
+                with open(directory+'/'+what.upper()+where+'.csv','w') as f:
+                    writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+                    writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
+                    [writer.writerow(row) for row in csvList]
+
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
 
@@ -72,7 +82,7 @@ class View(flask.views.MethodView):
         i = 0
         testList = []
         csvList = []
-        while i<10:
+        while i<searchLimit:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
@@ -117,12 +127,11 @@ class View(flask.views.MethodView):
                         namesList = []
                         for n in nameSoup.find_all('li',{'class':'b_algo'}):
                             if re.search('^.* \|.*LinkedIn',n.text):
-                                name = re.findall('^(.*) \|',n.text)[-1][0:-1].encode('utf-8').title()
+                                name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
                                 namesList.append(name)
                                 names = str(namesList)
                                 names = re.sub('(\')',' ',str(names))
                                 names = names.translate(None,'\[\]').strip()
-                                print name
                         for this in contactData:
                             if re.search(regNum,this.text):
                                 number = re.findall(altRegNum,this.text)[0].encode('utf-8')
@@ -146,11 +155,13 @@ class View(flask.views.MethodView):
                                             number = re.findall(altRegNum,moreSoup.text)
                                             for p in number:
                                                 number = p.encode('utf-8')
+                                                reformatNumber(regex1,number)
                                             writeCsv()
                                         else:
                                             number = re.findall(altRegNum,str(num))
                                             for z in number:
                                                 number = z.encode('utf-8')
+                                                reformatNumber(regex1,number)
                                             writeCsv()
                     except:
                         pass
