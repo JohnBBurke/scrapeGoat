@@ -1,5 +1,6 @@
 from flask import request, make_response, session
 import flask, flask.views
+from flaskext.mysql import MySQL
 from datetime import timedelta
 from bs4 import BeautifulSoup
 from os.path import expanduser
@@ -14,11 +15,6 @@ import requests
 {
     "detect_indentation": False
 }
-
-# app = flask.Flask(__name__)
-# app.secret_key = os.urandom(32)
-
-from flaskext.mysql import MySQL
  
 mysql = MySQL()
 app = flask.Flask(__name__)
