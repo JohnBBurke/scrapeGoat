@@ -2,6 +2,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 # import json
+import MySQLdb as mdb
 import csv
 import itertools
 import time
@@ -13,6 +14,9 @@ home = expanduser("~")
 desktop = home+'/Desktop'
 desktopCheck = os.path.isdir(home+"/Desktop")
 directory = desktop if desktopCheck is True else home   
+
+db = mdb.connect('localhost','tim','Kissinger23','relodeIndeed')
+cursor = db.cursor()
 
 print '\n\n\n\n\n'
 what = raw_input('what: ')
@@ -75,6 +79,8 @@ def writeCsv():
             writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
             writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
             [writer.writerow(row) for row in csvList]
+        cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
+                       (firmName,jobTitle,jobCity,jobState,number))
         
 getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
 intgr = lambda x: int(x) if x.isdigit() else x
@@ -182,6 +188,9 @@ while i<searchLimit:
         print e
         pass
     i+=10
+
+db.commit()
+db.close()
 
 newList = [list(x[0:2]) for x in csvList]
 noReps = [x for x,_ in itertools.groupby(newList)]

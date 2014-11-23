@@ -15,8 +15,22 @@ import requests
     "detect_indentation": False
 }
 
+# app = flask.Flask(__name__)
+# app.secret_key = os.urandom(32)
+
+from flaskext.mysql import MySQL
+ 
+mysql = MySQL()
 app = flask.Flask(__name__)
 app.secret_key = os.urandom(32)
+app.config['MYSQL_DATABASE_USER'] = 'tim'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'Kissinger23'
+app.config['MYSQL_DATABASE_DB'] = 'relodeIndeed'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
+conn = mysql.connect()
+cursor = conn.cursor()
 
 home = expanduser("~")
 desktop = home+'/Desktop'
@@ -61,6 +75,8 @@ class View(flask.views.MethodView):
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
                     [writer.writerow(row) for row in csvList]
+                cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
+                               (firmName,jobTitle,jobCity,jobState,number))
 
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
@@ -176,6 +192,9 @@ class View(flask.views.MethodView):
         output = make_response("Firm Name,Job Title,Job City,Job State,Number,Names,URL to LinkedIn Data"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
+
+        data = cursor.fetchone()
+        conn.commit()
 
         newList = [list(x[0:2]) for x in csvList]
         noReps = [x for x,_ in itertools.groupby(newList)]
