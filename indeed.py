@@ -2,7 +2,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 # import json
-import MySQLdb as mdb
+# import MySQLdb as mdb
 import csv
 import itertools
 import time
@@ -15,8 +15,8 @@ desktop = home+'/Desktop'
 desktopCheck = os.path.isdir(home+"/Desktop")
 directory = desktop if desktopCheck is True else home   
 
-db = mdb.connect('localhost','tim','Kissinger23','relodeIndeed')
-cursor = db.cursor()
+# db = mdb.connect('localhost','tim','Kissinger23','relodeIndeed')
+# cursor = db.cursor()
 
 print '\n\n\n\n\n'
 what = raw_input('what: ')
@@ -69,6 +69,23 @@ print '\n\n\n'
 
 time.sleep(.5)
 print 'your request is processing....'
+
+def reformatNumber(xperiod,xdash,x800,xperiod1,number):
+    number = number.encode('utf-8').strip()
+    if re.search(x800,number):
+        number = number[0]+' ('+number[2:5]+') '+number[6:]
+        print number
+    elif re.search(xdash,number):
+        number = '('+number[0:3]+') '+number[4:]
+        print number
+    elif re.search(xperiod,number):
+        number = '('+number[0:3]+') '+number[4:7]+'-'+number[8:]
+        print number
+    elif re.search(xperiod1,number):
+        number = number[0]+' ('+number[2:5]+') '+number[6:9]+'-'+number[10:]
+        print number
+    else:
+        pass
     
 def writeCsv():
     if not number:
@@ -79,8 +96,8 @@ def writeCsv():
             writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
             writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
             [writer.writerow(row) for row in csvList]
-        cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
-                       (firmName,jobTitle,jobCity,jobState,number))
+        # cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
+        #                (firmName,jobTitle,jobCity,jobState,number))
         
 getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
 intgr = lambda x: int(x) if x.isdigit() else x
@@ -187,10 +204,12 @@ while i<searchLimit:
     except Exception as e:
         print e
         pass
+
+    # db.commit()
+
     i+=10
 
-db.commit()
-db.close()
+# db.close()
 
 newList = [list(x[0:2]) for x in csvList]
 noReps = [x for x,_ in itertools.groupby(newList)]

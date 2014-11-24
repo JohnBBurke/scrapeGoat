@@ -1,8 +1,9 @@
 from flask import request, make_response, session
 import flask, flask.views
 from flaskext.mysql import MySQL
-from datetime import timedelta
 from bs4 import BeautifulSoup
+import requests
+from datetime import timedelta
 from os.path import expanduser
 import os
 import csv
@@ -10,23 +11,22 @@ import re
 import io
 import sys
 import itertools
-import requests
 
 {
     "detect_indentation": False
 }
  
-mysql = MySQL()
+# mysql = MySQL()
 app = flask.Flask(__name__)
 app.secret_key = os.urandom(32)
-app.config['MYSQL_DATABASE_USER'] = 'tim'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'Kissinger23'
-app.config['MYSQL_DATABASE_DB'] = 'relodeIndeed'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql.init_app(app)
+# app.config['MYSQL_DATABASE_USER'] = 'tim'
+# app.config['MYSQL_DATABASE_PASSWORD'] = 'Kissinger23'
+# app.config['MYSQL_DATABASE_DB'] = 'relodeIndeed'
+# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+# mysql.init_app(app)
 
-conn = mysql.connect()
-cursor = conn.cursor()
+# conn = mysql.connect()
+# cursor = conn.cursor()
 
 home = expanduser("~")
 desktop = home+'/Desktop'
@@ -52,15 +52,29 @@ class View(flask.views.MethodView):
         fromage = flask.request.form['fromage']
 
         regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
-        regex1 = re.compile(r'^[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
-        def reformatNumber(x,y):
-            if re.search(x,y):
-                z = '(' + y[0:3] +')'+y[3:]
-                z = re.sub('\)\.',') ',z)
-                z = re.sub('\.','-',z)
-                y = z
+        regexPeriod = re.compile('^[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
+        regexDash = re.compile('^[0-9]{3}-[0-9]{3}-[0-9]{4}')
+        regex800 = re.compile('^1-[0-9]{3}-[0-9]{3}-[0-9]{4}')
+        regexPeriod1 = re.compile('^1\.[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
+
+        def reformatNumber(xperiod,xdash,x800,xperiod1,number):
+            number = number.encode('utf-8').strip()
+            if re.search(x800,number):
+                number = number[0]+' ('+number[2:5]+') '+number[6:]
+                print number
+            elif re.search(xdash,number):
+                number = '('+number[0:3]+') '+number[4:]
+                print number
+            elif re.search(xperiod,number):
+                number = '('+number[0:3]+') '+number[4:7]+'-'+number[8:]
+                print number
+            elif re.search(xperiod1,number):
+                number = number[0]+' ('+number[2:5]+') '+number[6:9]+'-'+number[10:]
+                print number
+            else:
+                pass
 
         def writeCsv():
             if not number:
@@ -71,8 +85,8 @@ class View(flask.views.MethodView):
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
                     [writer.writerow(row) for row in csvList]
-                cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
-                               (firmName,jobTitle,jobCity,jobState,number))
+                # cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
+                #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
 
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
@@ -167,19 +181,21 @@ class View(flask.views.MethodView):
                                             number = re.findall(altRegNum,moreSoup.text)
                                             for p in number:
                                                 number = p
-                                                reformatNumber(regex1,number)
                                             writeCsv()
                                         else:
                                             number = re.findall(altRegNum,str(num))
                                             for z in number:
                                                 number = z
-                                                reformatNumber(regex1,number)
                                             writeCsv()
                     except:
                         pass
             except Exception as e:
                 print e
                 pass
+
+            # data = cursor.fetchone()
+            # conn.commit()
+
             i+=10
 
         si = io.BytesIO()
@@ -188,9 +204,6 @@ class View(flask.views.MethodView):
         output = make_response("Firm Name,Job Title,Job City,Job State,Number,Names,URL to LinkedIn Data"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
-
-        data = cursor.fetchone()
-        conn.commit()
 
         newList = [list(x[0:2]) for x in csvList]
         noReps = [x for x,_ in itertools.groupby(newList)]
@@ -232,6 +245,7 @@ class View(flask.views.MethodView):
             else:
                 pass
 
+        # conn.close()
         return output
 
 
