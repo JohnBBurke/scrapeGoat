@@ -52,27 +52,41 @@ class View(flask.views.MethodView):
         fromage = flask.request.form['fromage']
 
         regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
-        regex1 = re.compile(r'^[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
-        def reformatNumber(x,y):
-            if re.search(x,y):
-                z = '(' + y[0:3] +')'+y[3:]
-                z = re.sub('\)\.',') ',z)
-                z = re.sub('\.','-',z)
-                y = z
+        regexPeriod = re.compile('^[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
+        regexDash = re.compile('^[0-9]{3}-[0-9]{3}-[0-9]{4}')
+        regex800 = re.compile('^1-[0-9]{3}-[0-9]{3}-[0-9]{4}')
+        regexPeriod1 = re.compile('^1\.[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
+
+        def reformatNumber(xperiod,xdash,x800,xperiod1,number):
+            number = number.encode('utf-8').strip()
+            if re.search(x800,number):
+                number = number[0]+' ('+number[2:5]+') '+number[6:]
+                print number
+            elif re.search(xdash,number):
+                number = '('+number[0:3]+') '+number[4:]
+                print number
+            elif re.search(xperiod,number):
+                number = '('+number[0:3]+') '+number[4:7]+'-'+number[8:]
+                print number
+            elif re.search(xperiod1,number):
+                number = number[0]+' ('+number[2:5]+') '+number[6:9]+'-'+number[10:]
+                print number
+            else:
+                pass
 
         def writeCsv():
             if not number:
                 pass
             else:
-                csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch]) 
+                csvList.append([firmName,jobTitle,site,jobCity,jobState,number,googleNameSearch]) 
                 with open(directory+'/'+what.upper()+where+'.csv','w') as f:
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
+                    writer.writerow(['FIRM NAME','JOB TITLE','JOB LINK','JOB CITY','JOB STATE','NUMBER','URL FOR LINKEDIN DATA'])
                     [writer.writerow(row) for row in csvList]
-                cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
-                               (firmName,jobTitle,jobCity,jobState,number))
+                cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobLink,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s,%s,%s,%s,%s,%s,%s)',
+                               (firmName,jobTitle,site,jobCity,jobState,number,googleNameSearch))
 
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
@@ -94,7 +108,7 @@ class View(flask.views.MethodView):
         i = 0
         testList = []
         csvList = []
-        while i<searchLimit:
+        while i<10:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
@@ -125,39 +139,42 @@ class View(flask.views.MethodView):
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                         testList.append([firmName,jobTitle,jobCity,jobState])
                         # creates short link for each job posting
-                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                            # source = 'http://www.indeed.com'+link.get('href')
-                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                        #     payload = {'longUrl': source}
-                        #     headers = {'content-type':'application/json'}
-                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                        #     text = r.content
-                        #     site = str(json.loads(text)['id'])
-                        bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
-                        nameReq = requests.get(bingNameSearch)
-                        nameSoup = BeautifulSoup(nameReq.content)
-                        namesList = []
-                        for n in nameSoup.find_all('li',{'class':'b_algo'}):
-                            if re.search('^.* \|.*LinkedIn',n.text):
-                                name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
-                                namesList.append(name)
-                                names = str(namesList)
-                                names = re.sub('(\')',' ',str(names))
-                                names = names.translate(None,'\[\]').strip()
+                        for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                            source = 'http://www.indeed.com'+link.get('href')
+                            post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                            payload = {'longUrl': source}
+                            headers = {'content-type':'application/json'}
+                            r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                            text = r.content
+                            site = str(json.loads(text)['id'])
+                        googleNameSearch = 'https://www.google.com/search?q=%'+jobCity+'+'+jobState+'%22+%2B+%22'+firmNamePlus+'%22-intitle:%22profiles%22+-inurl:%22dir%2F+%22+site:linkedin.com%2Fpub%2F'
+                        # nameReq = requests.get(bingNameSearch)
+                        # nameSoup = BeautifulSoup(nameReq.content)
+                        # namesList = []
+                        # for n in nameSoup.find_all('li',{'class':'b_algo'}):
+                        #     if re.search('^.* \|.*LinkedIn',n.text):
+                        #         name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
+                        #         namesList.append(name)
+                        #         names = str(namesList)
+                        #         names = re.sub('(\')',' ',str(names))
+                        #         names = names.translate(None,'\[\]').strip()
                         for this in contactData:
                             if re.search(regNum,this.text):
-                                number = re.findall(altRegNum,this.text)[0].encode('utf-8')
+                                number = re.findall(altRegNum,this.text)[0]
+                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                 writeCsv()
                         for z in altContactData:
                             if not contactData:
                                 if re.search(altRegNum,z.text):
-                                    number = re.findall(altRegNum,z.text)[0].encode('utf-8')
+                                    number = re.findall(altRegNum,z.text)[0]
+                                    reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                     writeCsv()
                         for q in altaltContactData:
                             if not contactData:
                                 if not altContactData:
                                     if re.search(regNum,q.text):
-                                        number = re.findall(altRegNum,q.text)[0].encode('utf-8')
+                                        number = re.findall(altRegNum,q.text)[0]
+                                        reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                         writeCsv()
                         for num in moreSoup:
                             if not contactData:
@@ -167,13 +184,13 @@ class View(flask.views.MethodView):
                                             number = re.findall(altRegNum,moreSoup.text)
                                             for p in number:
                                                 number = p
-                                                reformatNumber(regex1,number)
+                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                             writeCsv()
                                         else:
                                             number = re.findall(altRegNum,str(num))
                                             for z in number:
                                                 number = z
-                                                reformatNumber(regex1,number)
+                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                             writeCsv()
                     except:
                         pass
@@ -185,7 +202,7 @@ class View(flask.views.MethodView):
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("Firm Name,Job Title,Job City,Job State,Number,Names,URL to LinkedIn Data"+'\n'+si.getvalue())
+        output = make_response("Firm Name,Job Title,Job City,Job State,Number,URL to LinkedIn Data"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
