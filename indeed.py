@@ -15,7 +15,7 @@ desktop = home+'/Desktop'
 desktopCheck = os.path.isdir(home+"/Desktop")
 directory = desktop if desktopCheck is True else home   
 
-# db = mdb.connect('localhost','tim','Kissinger23','relodeIndeed')
+# db = mdb.connect('localhost','tim','Kissinger23',*DB*)
 # cursor = db.cursor()
 
 print '\n\n\n\n\n'
@@ -96,7 +96,7 @@ def writeCsv():
             writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
             writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
             [writer.writerow(row) for row in csvList]
-        # cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
+        # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
         #                (firmName,jobTitle,jobCity,jobState,number))
         
 getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
@@ -105,14 +105,14 @@ intgr = lambda x: int(x) if x.isdigit() else x
 regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
 altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
-url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
+url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
 r = requests.get(url)
 soup = BeautifulSoup(r.content)
 try:
     limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
 except:
     time.sleep(1)
-    sys.exit("\n\nINDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+    sys.exit("\n\*WEBSITE*.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
 
 limit = [re.sub(',','',str(x)) for x in limit]
 limit = [intgr(x) for x in limit]
@@ -123,7 +123,7 @@ testList = []
 csvList = []
 while i<searchLimit:
     try:
-        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
+        url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
         gData = soup.find_all('div',{'class':'row'})
@@ -144,15 +144,15 @@ while i<searchLimit:
                     jobState = ''
                 firmNamePlus = re.sub("\'",'',firmName)
                 firmNamePlus = re.sub('\W','+',firmName)+'+'
-                bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState # try just jobCityState and compare     
-                info = requests.get(bingSearch)
+                *SEARCHENGINE* = 'http://www.*SEARCHENGINE*.com/search?q='+firmNamePlus+jobCity+'+'+jobState # try just jobCityState and compare     
+                info = requests.get(*SEARCHENGINE*)
                 moreSoup = BeautifulSoup(info.content)
                 contactData = moreSoup.find_all('div',{'class':"b_factrow"})
                 altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                 altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                 testList.append([firmName,jobTitle,jobCity,jobState])
                 # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                #     source = 'http://www.indeed.com'+link.get('href')
+                #     source = 'http://www.*WEBSITE*.com'+link.get('href')
                 #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
                 #     payload = {'longUrl': source}
                 #     headers = {'content-type':'application/json'}
