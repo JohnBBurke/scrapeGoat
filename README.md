@@ -1,10 +1,10 @@
 scrapeGoat
 ==========
 
-Scrapes indeed.com for job postings, then plugs that data into bing.com to get contact info. 
+Scrapes *WEBSITE*.com for job postings, then plugs that data into *SEARCHENGINE*.com to get contact info. 
 
-indeed.py can be run from the command line: 
+scraper.py can be run from the command line: 
 
-python indeed.py
+python scraper.py
 
-webindeed.py can be run from the web.
+webscraper.py can be run from the web.
