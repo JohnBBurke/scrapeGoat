@@ -21,7 +21,7 @@ app = flask.Flask(__name__)
 app.secret_key = os.urandom(32)
 # app.config['MYSQL_DATABASE_USER'] = 'tim'
 # app.config['MYSQL_DATABASE_PASSWORD'] = 'Kissinger23'
-# app.config['MYSQL_DATABASE_DB'] = 'relodeIndeed'
+# app.config['MYSQL_DATABASE_DB'] = '*DB*'
 # app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 # mysql.init_app(app)
 
@@ -85,20 +85,20 @@ class View(flask.views.MethodView):
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                     writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
                     [writer.writerow(row) for row in csvList]
-                # cursor.execute('INSERT into relodeIndeed (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
+                # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
                 #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
 
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
 
-        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
+        url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
 
         try:
             limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
         except:
-            flask.flash("INDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+            flask.flash("*WEBSITE*.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
             return self.get()
 
         limit = [re.sub(',','',str(x)) for x in limit]
@@ -110,7 +110,7 @@ class View(flask.views.MethodView):
         csvList = []
         while i<searchLimit:
             try:
-                url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
+                url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
                 soup = BeautifulSoup(r.content)
                 gData = soup.find_all('div',{'class':'row'})
@@ -140,7 +140,7 @@ class View(flask.views.MethodView):
                         testList.append([firmName,jobTitle,jobCity,jobState])
                         # creates short link for each job posting
                         # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                            # source = 'http://www.indeed.com'+link.get('href')
+                            # source = 'http://www.*WEBSITE*.com'+link.get('href')
                         #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
                         #     payload = {'longUrl': source}
                         #     headers = {'content-type':'application/json'}
