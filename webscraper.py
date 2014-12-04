@@ -1,6 +1,6 @@
 from flask import request, make_response, session
 import flask, flask.views
-from flaskext.mysql import MySQL
+# from flaskext.mysql import MySQL
 from bs4 import BeautifulSoup
 import requests
 from datetime import timedelta
