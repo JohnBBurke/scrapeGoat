@@ -1,7 +1,7 @@
 import re
 import requests
 from bs4 import BeautifulSoup
-# import json
+import json
 # import MySQLdb as mdb
 import csv
 import itertools
@@ -91,10 +91,10 @@ def writeCsv():
     if not number:
         pass
     else:
-        csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch]) 
+        csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,lead_description,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
         with open(directory+'/'+what.upper()+where+'.csv','w') as f:
             writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-            writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
+            writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','lead_apto','job_city','job_state','lead_zip','lead_description','lead_site','lead_title','balance_due','linkedin_data','custom2'])
             [writer.writerow(row) for row in csvList]
         # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber) values (%s, %s, %s, %s,%s)',
         #                (firmName,jobTitle,jobCity,jobState,number))
@@ -151,25 +151,49 @@ while i<10:
                 altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                 altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                 testList.append([firmName,jobTitle,jobCity,jobState])
-                # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                #     source = 'http://www.*WEBSITE*.com'+link.get('href')
-                #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                #     payload = {'longUrl': source}
-                #     headers = {'content-type':'application/json'}
-                #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                #     text = r.content
-                #     site = str(json.loads(text)['id'])
-                bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
-                nameReq = requests.get(bingNameSearch)
-                nameSoup = BeautifulSoup(nameReq.content)
-                namesList = []
-                for n in nameSoup.find_all('li',{'class':'b_algo'}):
-                    if re.search('^.* \|.*LinkedIn',n.text):
-                        name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
-                        namesList.append(name)
-                        names = str(namesList)
-                        names = re.sub('(\')',' ',str(names))
-                        names = names.translate(None,'\[\]').strip()
+
+                for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                    source = 'http://www.*WEBSITE*.com'+link.get('href')
+                    post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                    payload = {'longUrl': source}
+                    headers = {'content-type':'application/json'}
+                    r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                    text = r.content
+                    lead_site = str(json.loads(text)['id'])
+
+                # dummy_variables/autoDialFormat
+                lead_fname = 'n/a'
+                lead_mname = 'n/a'
+                lead_lname = 'n/a'
+                # lead_phone -> number
+                name_prefix = 'n/a'
+                name_suffix = 'n/a'
+                # lead company -> firmName
+                lead_email = 'n/a'
+                lead_address = 'n/a'
+                lead_apto = 'n/a'
+                # lead_city -> jobCity
+                # lead_state -> jobState
+                lead_zip = 'n/a'
+                lead_description = jobTitle
+                # lead_website -> lead_site
+                lead_title = 'n/a'
+                balance_due = 'n/a'
+                # custom1 -> googleNameSearch
+                custom2 = 'n/a'
+                writeCsv()
+                googleNameSearch = 'https://www.google.com/search?q=%'+jobCity+'+'+jobState+'%22+%2B+%22'+firmNamePlus+'%22-intitle:%22profiles%22+-inurl:%22dir%2F+%22+site:linkedin.com%2Fpub%2F'
+                # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
+                # nameReq = requests.get(bingNameSearch)
+                # nameSoup = BeautifulSoup(nameReq.content)
+                # namesList = []
+                # for n in nameSoup.find_all('li',{'class':'b_algo'}):
+                #     if re.search('^.* \|.*LinkedIn',n.text):
+                #         name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
+                #         namesList.append(name)
+                #         names = str(namesList)
+                #         names = re.sub('(\')',' ',str(names))
+                #         names = names.translate(None,'\[\]').strip()
                 for this in contactData:
                     if re.search(regNum,this.text):
                         number = re.findall(altRegNum,this.text)[0].encode('utf-8')

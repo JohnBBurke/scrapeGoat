@@ -5,17 +5,19 @@ from bs4 import BeautifulSoup
 import requests
 from datetime import timedelta
 from os.path import expanduser
+import json
 import os
 import csv
 import re
 import io
 import sys
 import itertools
+import subprocess
 
-{
-    "detect_indentation": False
-}
- 
+# {
+#     "detect_indentation": False
+# }
+subprocess.call('./open_browser.txt',shell=True)
 # mysql = MySQL()
 app = flask.Flask(__name__)
 app.secret_key = os.urandom(32)
@@ -76,14 +78,15 @@ class View(flask.views.MethodView):
             else:
                 pass
 
+        
         def writeCsv():
             if not number:
                 pass
             else:
-                csvList.append([firmName,jobTitle,jobCity,jobState,number,googleNameSearch]) 
+                csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
                 with open(directory+'/'+what.upper()+where+'.csv','w') as f:
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','URL FOR LINKEDIN DATA'])
+                    writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','lead_apto','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
                     [writer.writerow(row) for row in csvList]
                 # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
                 #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
@@ -139,14 +142,14 @@ class View(flask.views.MethodView):
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
                         testList.append([firmName,jobTitle,jobCity,jobState])
                         # creates short link for each job posting
-                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                            # source = 'http://www.*WEBSITE*.com'+link.get('href')
-                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                        #     payload = {'longUrl': source}
-                        #     headers = {'content-type':'application/json'}
-                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                        #     text = r.content
-                        #     site = str(json.loads(text)['id'])
+                        for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                            source = 'http://www.indeed.com'+link.get('href')
+                            post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                            payload = {'longUrl': source}
+                            headers = {'content-type':'application/json'}
+                            r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                            text = r.content
+                            lead_site = str(json.loads(text)['id'])
                         googleNameSearch = 'https://www.google.com/search?q=%'+jobCity+'+'+jobState+'%22+%2B+%22'+firmNamePlus+'%22-intitle:%22profiles%22+-inurl:%22dir%2F+%22+site:linkedin.com%2Fpub%2F'
                         # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
                         # nameReq = requests.get(bingNameSearch)
@@ -159,6 +162,28 @@ class View(flask.views.MethodView):
                         #         names = str(namesList)
                         #         names = re.sub('(\')',' ',str(names))
                         #         names = names.translate(None,'\[\]').strip()
+
+                        # dummy_variables/autoDialFormat
+
+                        lead_fname = 'n/a'
+                        lead_mname = 'n/a'
+                        lead_lname = 'n/a'
+                        # lead_phone -> number
+                        name_prefix = 'n/a'
+                        name_suffix = 'n/a'
+                        # lead company -> firmName
+                        lead_email = 'n/a'
+                        lead_address = 'n/a'
+                        lead_apto = 'n/a'
+                        # lead_city -> jobCity
+                        # lead_state -> jobState
+                        lead_zip = 'n/a'
+                        # lead_description -> jobTitle
+                        # lead_website -> leadSite
+                        lead_title = 'n/a'
+                        balance_due = 'n/a'
+                        # custom1 -> googleNameSearch
+                        custom2 = 'n/a'
                         for this in contactData:
                             if re.search(regNum,this.text):
                                 number = re.findall(altRegNum,this.text)[0].encode('utf-8')
@@ -207,7 +232,7 @@ class View(flask.views.MethodView):
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("Firm Name,Job Title,Job City,Job State,Number,URL to LinkedIn Data"+'\n'+si.getvalue())
+        output = make_response("lead_fname,lead_mname,lead_lname,lead_number,name_prefix,name_suffix,firm_name,lead_email,lead_address,lead_apto,job_city,job_state,lead_zip,lead_description,lead_site,lead_title,balance_due,linkedin_data,custom2"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
@@ -235,9 +260,9 @@ class View(flask.views.MethodView):
         for x in testList:
             if x[0:2] not in newList:
                 nonScraped.append([x])
-                with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
-                    writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    [writer.writerow(row) for row in nonScraped]
+                # with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
+                #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+                #     [writer.writerow(row) for row in nonScraped]
                 print '\n'
             else:
                 pass
@@ -261,4 +286,3 @@ app.add_url_rule('/',
 
 app.debug = True
 app.run()
-
