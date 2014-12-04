@@ -91,14 +91,14 @@ class View(flask.views.MethodView):
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
 
-        url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
+        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
 
         try:
             limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
         except:
-            flask.flash("*WEBSITE*.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+            flask.flash("INDEED.COM RETURNED NO RESULTS!\n\nPlease try again.\n\n")
             return self.get()
 
         limit = [re.sub(',','',str(x)) for x in limit]
@@ -110,7 +110,7 @@ class View(flask.views.MethodView):
         csvList = []
         while i<searchLimit:
             try:
-                url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
+                url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
                 soup = BeautifulSoup(r.content)
                 gData = soup.find_all('div',{'class':'row'})

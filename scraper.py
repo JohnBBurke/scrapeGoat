@@ -105,14 +105,14 @@ intgr = lambda x: int(x) if x.isdigit() else x
 regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
 altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
 
-url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
+url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
 r = requests.get(url)
 soup = BeautifulSoup(r.content)
 try:
     limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
 except:
     time.sleep(1)
-    sys.exit("\n\*WEBSITE*.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
+    sys.exit("\n\INDEED.COM RETURNED NO RESULTS!\n\nPlease try Again.\n\n")
 
 limit = [re.sub(',','',str(x)) for x in limit]
 limit = [intgr(x) for x in limit]
@@ -121,9 +121,9 @@ searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 i = 0
 testList = []
 csvList = []
-while i<searchLimit:
+while i<10:
     try:
-        url = 'http://www.*WEBSITE*.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
+        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any='+keywords+'&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
         gData = soup.find_all('div',{'class':'row'})
@@ -144,8 +144,8 @@ while i<searchLimit:
                     jobState = ''
                 firmNamePlus = re.sub("\'",'',firmName)
                 firmNamePlus = re.sub('\W','+',firmName)+'+'
-                *SEARCHENGINE* = 'http://www.*SEARCHENGINE*.com/search?q='+firmNamePlus+jobCity+'+'+jobState # try just jobCityState and compare     
-                info = requests.get(*SEARCHENGINE*)
+                bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState # try just jobCityState and compare     
+                info = requests.get(bingSearch)
                 moreSoup = BeautifulSoup(info.content)
                 contactData = moreSoup.find_all('div',{'class':"b_factrow"})
                 altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
