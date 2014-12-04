@@ -19,8 +19,8 @@ import itertools
 # mysql = MySQL()
 app = flask.Flask(__name__)
 app.secret_key = os.urandom(32)
-# app.config['MYSQL_DATABASE_USER'] = 'tim'
-# app.config['MYSQL_DATABASE_PASSWORD'] = 'Kissinger23'
+# app.config['MYSQL_DATABASE_USER'] = 'name'
+# app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
 # app.config['MYSQL_DATABASE_DB'] = '*DB*'
 # app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 # mysql.init_app(app)
@@ -80,10 +80,10 @@ class View(flask.views.MethodView):
             if not number:
                 pass
             else:
-                csvList.append([firmName,jobTitle,jobCity,jobState,number,names,bingNameSearch]) 
+                csvList.append([firmName,jobTitle,jobCity,jobState,number,googleNameSearch]) 
                 with open(directory+'/'+what.upper()+where+'.csv','w') as f:
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','NAMES FROM LINKEDIN','URL FOR LINKEDIN DATA'])
+                    writer.writerow(['FIRM NAME','JOB TITLE','JOB CITY','JOB STATE','NUMBER','URL FOR LINKEDIN DATA'])
                     [writer.writerow(row) for row in csvList]
                 # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
                 #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
@@ -147,31 +147,35 @@ class View(flask.views.MethodView):
                         #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
                         #     text = r.content
                         #     site = str(json.loads(text)['id'])
-                        bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
-                        nameReq = requests.get(bingNameSearch)
-                        nameSoup = BeautifulSoup(nameReq.content)
-                        namesList = []
-                        for n in nameSoup.find_all('li',{'class':'b_algo'}):
-                            if re.search('^.* \|.*LinkedIn',n.text):
-                                name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
-                                namesList.append(name)
-                                names = str(namesList)
-                                names = re.sub('(\')',' ',str(names))
-                                names = names.translate(None,'\[\]').strip()
+                        googleNameSearch = 'https://www.google.com/search?q=%'+jobCity+'+'+jobState+'%22+%2B+%22'+firmNamePlus+'%22-intitle:%22profiles%22+-inurl:%22dir%2F+%22+site:linkedin.com%2Fpub%2F'
+                        # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
+                        # nameReq = requests.get(bingNameSearch)
+                        # nameSoup = BeautifulSoup(nameReq.content)
+                        # namesList = []
+                        # for n in nameSoup.find_all('li',{'class':'b_algo'}):
+                        #     if re.search('^.* \|.*LinkedIn',n.text):
+                        #         name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
+                        #         namesList.append(name)
+                        #         names = str(namesList)
+                        #         names = re.sub('(\')',' ',str(names))
+                        #         names = names.translate(None,'\[\]').strip()
                         for this in contactData:
                             if re.search(regNum,this.text):
                                 number = re.findall(altRegNum,this.text)[0].encode('utf-8')
+                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                 writeCsv()
                         for z in altContactData:
                             if not contactData:
                                 if re.search(altRegNum,z.text):
                                     number = re.findall(altRegNum,z.text)[0].encode('utf-8')
+                                    reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                     writeCsv()
                         for q in altaltContactData:
                             if not contactData:
                                 if not altContactData:
                                     if re.search(regNum,q.text):
                                         number = re.findall(altRegNum,q.text)[0].encode('utf-8')
+                                        reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                         writeCsv()
                         for num in moreSoup:
                             if not contactData:
@@ -181,11 +185,13 @@ class View(flask.views.MethodView):
                                             number = re.findall(altRegNum,moreSoup.text)
                                             for p in number:
                                                 number = p
+                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                             writeCsv()
                                         else:
                                             number = re.findall(altRegNum,str(num))
                                             for z in number:
                                                 number = z
+                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
                                             writeCsv()
                     except:
                         pass
@@ -201,7 +207,7 @@ class View(flask.views.MethodView):
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("Firm Name,Job Title,Job City,Job State,Number,Names,URL to LinkedIn Data"+'\n'+si.getvalue())
+        output = make_response("Firm Name,Job Title,Job City,Job State,Number,URL to LinkedIn Data"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
