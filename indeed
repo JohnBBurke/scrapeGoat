@@ -281,45 +281,45 @@ class View(flask.views.MethodView):
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
-        newList = [list(x[0:2]) for x in csvList]
-        noReps = [x for x,_ in itertools.groupby(newList)]
+        # newList = [list(x[0:2]) for x in csvList]
+        # noReps = [x for x,_ in itertools.groupby(newList)]
 
-        if limit[5]>=1000:
-            scrapeRate = float(len(noReps))/len(testList)*100
-
-        else:
-            scrapeRate = float(len(noReps))/len(testList)*100
-            
-        scrapeRateStat = '%.3f'%round(scrapeRate,3)
-
-        flask.flash('\n\n')
-        flask.flash('SCRAPE RATES:')
-        stats = str(scrapeRateStat)+'% scrape rate'
-        flask.flash(stats),#'-- Actual'
-
-        testStats = '%.3f'%(float(len(noReps))/len(testList)*100)
-
-        nonScraped = []
-        newList = [i[0:2] for i in csvList]
-
-        for x in testList:
-            if x[0:2] not in newList:
-                nonScraped.append([x])
-                # with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
-                #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                #     [writer.writerow(row) for row in nonScraped]
-                print '\n'
-            else:
-                pass
-        flask.flash('NON-scraped'+what.upper()+where+'.csv is ready in '+directory+'\n')
-        flask.flash(str(len(nonScraped))+' out of '+str(len(testList))+' were NOT scraped\n\n')
+        # if limit[5]>=1000:
+        #     scrapeRate = float(len(noReps))/len(testList)*100
 
         # else:
-        for x in testList:
-            if x[0:2] not in newList:
-                nonScraped.append([x])
-            else:
-                pass
+        #     scrapeRate = float(len(noReps))/len(testList)*100
+            
+        # scrapeRateStat = '%.3f'%round(scrapeRate,3)
+
+        # flask.flash('\n\n')
+        # flask.flash('SCRAPE RATES:')
+        # stats = str(scrapeRateStat)+'% scrape rate'
+        # flask.flash(stats),#'-- Actual'
+
+        # testStats = '%.3f'%(float(len(noReps))/len(testList)*100)
+
+        # nonScraped = []
+        # newList = [i[0:2] for i in csvList]
+
+        # for x in testList:
+        #     if x[0:2] not in newList:
+        #         nonScraped.append([x])
+        #         # with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
+        #         #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+        #         #     [writer.writerow(row) for row in nonScraped]
+        #         print '\n'
+        #     else:
+        #         pass
+        # flask.flash('NON-scraped'+what.upper()+where+'.csv is ready in '+directory+'\n')
+        # flask.flash(str(len(nonScraped))+' out of '+str(len(testList))+' were NOT scraped\n\n')
+
+        # # else:
+        # for x in testList:
+        #     if x[0:2] not in newList:
+        #         nonScraped.append([x])
+        #     else:
+        #         pass
 
         # conn.close()
         return output
