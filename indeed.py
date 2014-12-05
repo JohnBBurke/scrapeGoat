@@ -9,6 +9,11 @@ import io
 import sys
 import itertools
 
+if subprocess.call('sudo easy_install pip',shell=True) == 0:
+    print 'pip installed'
+else:
+    subprocess.call('sudo easy_install pip',shell=True)
+
 if subprocess.call("python -c 'import requests'", shell=True) == 0:
     print 'requests installed'
 else:
