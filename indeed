@@ -31,9 +31,9 @@ else:
     print 'installing pip...'
     print '---------------------------------'
 
-bashScript("python -c 'import requests'",'requests==2.0.0')
-bashScript("python -c 'import bs4'",'beautifulsoup4==4.3.1')
-bashScript("python -c 'import flask'",'flask==0.10.1')
+bashScript(code="python -c 'import requests'",package='requests==2.0.0')
+bashScript(code="python -c 'import bs4'",package='beautifulsoup4==4.3.1')
+bashScript(code="python -c 'import flask'",package='flask==0.10.1')
 
 from flask import request, make_response, session
 import flask, flask.views
