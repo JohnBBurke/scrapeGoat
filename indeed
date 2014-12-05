@@ -1,6 +1,8 @@
-import subprocess
+#!/usr/bin/env python
+
 from datetime import timedelta
 from os.path import expanduser
+import subprocess
 import json
 import os
 import csv
@@ -9,7 +11,17 @@ import io
 import sys
 import itertools
 
-if subprocess.call('sudo easy_install pip',shell=True) == 0:
+
+def bashScript(code,package):
+    if subprocess.call(code,shell=True) == 0:
+        print package, 'installed'
+        print '---------------------------------'
+    else:
+        subprocess.call('sudo pip install '+package, shell=True)
+        'installing ',package,'....'
+        print '---------------------------------'
+
+if subprocess.call('easy_install pip',shell=True) == 0:
     print '---------------------------------'
     print 'pip installed'
     print '---------------------------------'
@@ -19,29 +31,9 @@ else:
     print 'installing pip...'
     print '---------------------------------'
 
-if subprocess.call("python -c 'import requests'", shell=True) == 0:
-    print 'requests installed'
-    print '---------------------------------'
-else:
-    subprocess.call('sudo pip install requests==2.0.0',shell=True)
-    print 'installing requests...'
-    print '---------------------------------'
-
-if subprocess.call("python -c 'import bs4'",shell=True) == 0:
-    print 'beautifulsoup4 installed'
-    print '---------------------------------'
-else:
-    subprocess.call('sudo pip install beautifulsoup4==4.3.1',shell=True)
-    print 'installing beautifulsoup4...'
-    print '---------------------------------'
-
-if subprocess.call("python -c 'import flask'", shell=True) == 0:
-    print 'flask installed'
-    print '---------------------------------'
-else:
-    subprocess.call('sudo pip install flask==0.10.1',shell=True)
-    print 'installing flask...'
-    print '---------------------------------'
+bashScript("python -c 'import requests'",'requests==2.0.0')
+bashScript("python -c 'import bs4'",'beautifulsoup4==4.3.1')
+bashScript("python -c 'import flask'",'flask==0.10.1')
 
 from flask import request, make_response, session
 import flask, flask.views
