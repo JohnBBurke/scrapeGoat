@@ -203,7 +203,7 @@ class View(flask.views.MethodView):
                         #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
                         #     text = r.content
                         #     lead_site = str(json.loads(text)['id'])
-                        googleNameSearch = 'https://www.google.com/search?q=%'+jobCity+'+'+jobState+'%22+%2B+%22'+firmNamePlus+'%22-intitle:%22profiles%22+-inurl:%22dir%2F+%22+site:linkedin.com%2Fpub%2F'
+                        googleNameSearch = '"~hr" + "'+jobCityState+'"+"'+firmName+'"-intitle:"profiles" -inurl:"dir/ " site:linkedin.com/in/ OR site:linkedin.com/pub/'
                         # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
                         # nameReq = requests.get(bingNameSearch)
                         # nameSoup = BeautifulSoup(nameReq.content)
