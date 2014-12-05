@@ -12,17 +12,17 @@ import itertools
 if subprocess.call("python -c 'import requests'", shell=True) == 0:
     print 'requests installed'
 else:
-    subprocess.call('pip install requests==2.0.0')
+    subprocess.call('sudo pip install requests==2.0.0',shell=True)
 
 if subprocess.call("python -c 'import bs4'",shell=True) == 0:
     print 'beautifulsoup4 installed'
 else:
-    subprocess.call('pip install beautifulsoup4==4.3.1')
+    subprocess.call('sudo pip install beautifulsoup4==4.3.1',shell=True)
 
 if subprocess.call("python -c 'import flask'", shell=True) == 0:
     print 'flask installed'
 else:
-    subprocess.call('pip install flask==0.10.1')
+    subprocess.call('sudo pip install flask==0.10.1',shell=True)
 
 subprocess.call('./open_browser.txt',shell=True)
 
