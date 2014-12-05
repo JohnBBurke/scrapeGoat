@@ -10,24 +10,38 @@ import sys
 import itertools
 
 if subprocess.call('sudo easy_install pip',shell=True) == 0:
+    print '---------------------------------'
     print 'pip installed'
+    print '---------------------------------'
 else:
     subprocess.call('sudo easy_install pip',shell=True)
+    print '---------------------------------'
+    print 'installing pip...'
+    print '---------------------------------'
 
 if subprocess.call("python -c 'import requests'", shell=True) == 0:
     print 'requests installed'
+    print '---------------------------------'
 else:
     subprocess.call('sudo pip install requests==2.0.0',shell=True)
+    print 'installing requests...'
+    print '---------------------------------'
 
 if subprocess.call("python -c 'import bs4'",shell=True) == 0:
     print 'beautifulsoup4 installed'
+    print '---------------------------------'
 else:
     subprocess.call('sudo pip install beautifulsoup4==4.3.1',shell=True)
+    print 'installing beautifulsoup4...'
+    print '---------------------------------'
 
 if subprocess.call("python -c 'import flask'", shell=True) == 0:
     print 'flask installed'
+    print '---------------------------------'
 else:
     subprocess.call('sudo pip install flask==0.10.1',shell=True)
+    print 'installing flask...'
+    print '---------------------------------'
 
 from flask import request, make_response, session
 import flask, flask.views
@@ -38,14 +52,17 @@ import requests
 
 if 'scrape.indeed' in open('/private/etc/hosts').read():
     print 'scrape.indeed already initialized'
+    print '---------------------------------'
     pass
 else:
     subprocess.call('''sudo bash -c "echo -e '127.0.0.1\tscrape.indeed\n' >> /etc/hosts"''',shell=True)
     print 'scraped.indeed now initialized'
+    print '---------------------------------'
 
 try:
     subprocess.call('open http://scrape.indeed:5000',shell=True)
     print 'running on scrape.indeed:5000'
+    print '---------------------------------'
 except:
     subprocess.call('open http://127.0.0.1:5000',shell=True)
 
