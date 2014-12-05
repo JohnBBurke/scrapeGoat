@@ -1,4 +1,13 @@
 import subprocess
+from datetime import timedelta
+from os.path import expanduser
+import json
+import os
+import csv
+import re
+import io
+import sys
+import itertools
 
 if subprocess.call("python -c 'import requests'", shell=True) == 0:
     print 'requests installed'
@@ -22,15 +31,6 @@ import flask, flask.views
 # from flaskext.mysql import MySQL
 from bs4 import BeautifulSoup
 import requests
-from datetime import timedelta
-from os.path import expanduser
-import json
-import os
-import csv
-import re
-import io
-import sys
-import itertools
 
 # {
 #     "detect_indentation": False
@@ -303,5 +303,4 @@ app.add_url_rule('/',
                 view_func=View.as_view('main'), 
                 methods=['GET','POST'])
 
-app.debug = True
-app.run()
+app.run(debug=True, use_reloader=False)
