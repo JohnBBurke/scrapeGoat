@@ -29,17 +29,25 @@ if subprocess.call("python -c 'import flask'", shell=True) == 0:
 else:
     subprocess.call('sudo pip install flask==0.10.1',shell=True)
 
-try:
-    subprocess.call('''sudo bash -c "echo -e '127.0.0.1\tscrape.indeed\n' >> /etc/hosts"''',shell=True)
-    subprocess.call('open http://scrape.indeed:5000',shell=True)
-except:
-    subprocess.call('open http://127.0.0.1:5000',shell=True)
-
 from flask import request, make_response, session
 import flask, flask.views
 # from flaskext.mysql import MySQL
 from bs4 import BeautifulSoup
 import requests
+
+
+if 'scrape.indeed' in open('/private/etc/hosts').read():
+    print 'scrape.indeed already initialized'
+    pass
+else:
+    subprocess.call('''sudo bash -c "echo -e '127.0.0.1\tscrape.indeed\n' >> /etc/hosts"''',shell=True)
+    print 'scraped.indeed now initialized'
+
+try:
+    subprocess.call('open http://scrape.indeed:5000',shell=True)
+    print 'running on scrape.indeed:5000'
+except:
+    subprocess.call('open http://127.0.0.1:5000',shell=True)
 
 # {
 #     "detect_indentation": False
