@@ -3,8 +3,10 @@ scrapeGoat
 
 Scrapes *WEBSITE*.com for job postings, then plugs that data into *SEARCHENGINE*.com to get contact info. 
 
-scraper.py can be run from the command line: 
+to run:
 
-python scraper.py
+git clone https://www.github.com/tmthyjames/scrpeGoat.git
 
-webscraper.py can be run from the web.
+cd scrapeGoat
+
+python indeed.py
