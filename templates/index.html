@@ -34,9 +34,14 @@
 										<input type="text" id="salary" name="salary" value size="17" />
 										<n>per year</n><span class="example" style="font-size:smaller;color:#666"> ex. $50,000 or $40K-$90K</span>
 										<tr>
+											<td>
+												<label for="norecruiters">exclude staffing agencies</label>
+												<select id="norecruiters" name="sr" style="cursor:pointer">
+													<option value="directhire">yes</option>
+													<option value="">no</option>
+											</td>
 											<td style="padding:5px 3px;" colspan="2" nowrap>
-												<n>age - </n>
-												<label for="fromage">jobs published</label>
+												<label for="fromage">age - jobs published</label>
 												<select id="fromage" name="fromage" style="cursor:pointer">
 													<option value="any">anytime</option>
 													<option value="15">within 15 days</option>
