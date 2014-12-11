@@ -2,6 +2,10 @@
 
 from datetime import timedelta
 from os.path import expanduser
+from itertools import groupby
+from collections import OrderedDict
+import itertools
+import collections
 import subprocess
 import json
 import os
@@ -9,7 +13,6 @@ import csv
 import re
 import io
 import sys
-import itertools
 
 
 def bashScript(code,package):
@@ -97,6 +100,7 @@ class View(flask.views.MethodView):
         jobType = flask.request.form['jt']
         salary = flask.request.form['salary']
         fromage = flask.request.form['fromage']
+        staffing = flask.request.form['sr']
 
         regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
         altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
@@ -123,15 +127,24 @@ class View(flask.views.MethodView):
             else:
                 pass
 
+        def uniq(input):
+          output = []
+          for x in input:
+            if x not in output:
+              output.append(x)
+          return output
         
+        def appendit():
+            csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
+
         def writeCsv():
             if not number:
                 pass
             else:
-                csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
+                # csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
                 with open(directory+'/'+what.upper()+where+'.csv','w') as f:
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','lead_apto','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
+                    writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
                     [writer.writerow(row) for row in csvList]
                 # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
                 #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
@@ -139,7 +152,7 @@ class View(flask.views.MethodView):
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x
 
-        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
+        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr='+staffing+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
         r = requests.get(url)
         soup = BeautifulSoup(r.content)
 
@@ -154,20 +167,23 @@ class View(flask.views.MethodView):
         searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
 
         i = 0
-        testList = []
+        # testList = []
         csvList = []
-        while i<searchLimit:
+        while i<50:
             try:
-                url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr=directhire'+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
+                url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr='+staffing+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
                 soup = BeautifulSoup(r.content)
                 gData = soup.find_all('div',{'class':'row'})
+
                 for item in gData:
                     try:
                         firmInfo = [getInfo('span','class','company'),
                                     getInfo('a','target','_blank'),
-                                    getInfo('span','class','location')]
+                                    getInfo('span','class','location')] # getInfo('span','class','date')
                         firmName,jobTitle,jobCityState = firmInfo
+                        jobTitle = jobTitle+'!@#'
+
                         if jobCityState != 'United States':
                             jobCityState = re.sub('[0-9]*','',jobCityState).strip()
                             jobCityState = re.sub('\(.*\)','',jobCityState).strip()
@@ -177,6 +193,7 @@ class View(flask.views.MethodView):
                         else:
                             jobCity = 'United States'
                             jobState = ''
+
                         firmNamePlus = re.sub("\'",'',firmName)
                         firmNamePlus = re.sub('\W','+',firmName)+'+'
                         bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState     
@@ -185,7 +202,8 @@ class View(flask.views.MethodView):
                         contactData = moreSoup.find_all('div',{'class':"b_factrow"})
                         altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
-                        testList.append([firmName,jobTitle,jobCity,jobState])
+                        # testList.append([firmName,jobTitle,jobCity,jobState])
+
                         # creates short link for each job posting
                         # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
                         #     source = 'http://www.indeed.com'+link.get('href')
@@ -195,7 +213,9 @@ class View(flask.views.MethodView):
                         #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
                         #     text = r.content
                         #     lead_site = str(json.loads(text)['id'])
-                        googleNameSearch = '"~hr" + "'+jobCityState+'"+"'+firmName+'"-intitle:"profiles" -inurl:"dir/ " site:linkedin.com/in/ OR site:linkedin.com/pub/'
+
+                        googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCityState+'"+"'+firmName+'"-intitle:"profiles" -inurl:"dir/ " site:linkedin.com/in/ OR site:linkedin.com/pub/'
+
                         # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
                         # nameReq = requests.get(bingNameSearch)
                         # nameSoup = BeautifulSoup(nameReq.content)
@@ -210,43 +230,44 @@ class View(flask.views.MethodView):
 
                         # dummy_variables/autoDialFormat
 
-                        lead_fname = 'n/a'
-                        lead_mname = 'n/a'
-                        lead_lname = 'n/a'
+                        lead_fname = 'empty'
+                        lead_mname = 'Empty'
+                        lead_lname = 'eMpty'
                         # lead_phone -> number
-                        name_prefix = 'n/a'
-                        name_suffix = 'n/a'
+                        name_prefix = 'emPty'
+                        name_suffix = 'empTy'
                         # lead company -> firmName
-                        lead_email = 'n/a'
-                        lead_address = 'n/a'
-                        lead_apto = 'n/a'
+                        lead_email = 'emptY'
+                        lead_address = 'EMpty'
+                        lead_apto = 'EMPTy'
                         # lead_city -> jobCity
                         # lead_state -> jobState
-                        lead_zip = 'n/a'
+                        lead_zip = 'eMPty'
                         # lead_description -> jobTitle
-                        lead_site = 'n/a'
-                        lead_title = 'n/a'
-                        balance_due = 'n/a'
+                        lead_site = 'emPTy'
+                        lead_title = 'empTY'
+                        balance_due = 'EmptY'
                         # custom1 -> googleNameSearch
-                        custom2 = 'n/a'
+                        custom2 = 'EMPTY'
+
                         for this in contactData:
                             if re.search(regNum,this.text):
                                 number = re.findall(altRegNum,this.text)[0].encode('utf-8')
                                 reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                writeCsv()
+                                appendit()
                         for z in altContactData:
                             if not contactData:
                                 if re.search(altRegNum,z.text):
                                     number = re.findall(altRegNum,z.text)[0].encode('utf-8')
                                     reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                    writeCsv()
+                                    appendit()
                         for q in altaltContactData:
                             if not contactData:
                                 if not altContactData:
                                     if re.search(regNum,q.text):
                                         number = re.findall(altRegNum,q.text)[0].encode('utf-8')
                                         reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                        writeCsv()
+                                        appendit()
                         for num in moreSoup:
                             if not contactData:
                                 if not altContactData:
@@ -256,13 +277,13 @@ class View(flask.views.MethodView):
                                             for p in number:
                                                 number = p
                                                 reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                            writeCsv()
+                                            appendit()
                                         else:
                                             number = re.findall(altRegNum,str(num))
                                             for z in number:
                                                 number = z
                                                 reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                            writeCsv()
+                                            appendit()
                     except:
                         pass
             except Exception as e:
@@ -274,10 +295,38 @@ class View(flask.views.MethodView):
 
             i+=10
 
+        index = collections.defaultdict(list)
+
+        # generate list of jobs per firm
+        for item in csvList:
+            index[item[6]].append(item[13])
+
+        # insert into existing table
+        for item in csvList:
+        #     del item[1]
+            item[13:14] = index[item[6]]
+
+        csvList = [uniq(i) for i in uniq(csvList)]
+
+        newcsvlist = []
+        for lst in csvList:
+            d = []
+            for k, g in groupby(lst, lambda x: '!@#' in x):
+                if k:
+                    d.append(';    '.join(g))
+                else:
+                    d.extend(g)
+            newcsvlist.append(d)
+
+        csvList = [[re.sub('!@#','',str(j)) for j in i] for i in newcsvlist]
+        csvList = [[re.sub('empty','N/A',str(j),flags=re.IGNORECASE) for j in i] for i in csvList]
+
+        writeCsv()
+
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("lead_fname,lead_mname,lead_lname,lead_number,name_prefix,name_suffix,firm_name,lead_email,lead_address,lead_apto,job_city,job_state,lead_zip,lead_description,lead_site,lead_title,balance_due,linkedin_data,custom2"+'\n'+si.getvalue())
+        output = make_response("lead_fname,lead_mname,lead_lname,lead_number,name_prefix,name_suffix,firm_name,lead_email,lead_address,date_published,job_city,job_state,lead_zip,lead_description,lead_site,lead_title,balance_due,linkedin_data,custom2"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
