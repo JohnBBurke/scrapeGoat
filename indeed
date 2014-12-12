@@ -4,6 +4,8 @@ from datetime import timedelta
 from os.path import expanduser
 from itertools import groupby
 from collections import OrderedDict
+from time import sleep
+from random import uniform
 import itertools
 import collections
 import subprocess
@@ -194,6 +196,9 @@ class View(flask.views.MethodView):
                         firmNamePlus = re.sub("\'",'',firmName)
                         firmNamePlus = re.sub('\W','+',firmName)+'+'
                         bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState     
+
+                        sleep(uniform(0.001,1.0))
+
                         info = requests.get(bingSearch)
                         moreSoup = BeautifulSoup(info.content)
                         contactData = moreSoup.find_all('div',{'class':"b_factrow"})
