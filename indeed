@@ -138,16 +138,13 @@ class View(flask.views.MethodView):
             csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
 
         def writeCsv():
-            if not number:
-                pass
-            else:
                 # csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
-                with open(directory+'/'+what.upper()+where+'.csv','w') as f:
-                    writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
-                    [writer.writerow(row) for row in csvList]
-                # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
-                #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
+            with open(directory+'/'+what.upper()+where+'.csv','w') as f:
+                writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+                writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
+                [writer.writerow(row) for row in csvList]
+            # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
+            #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
 
         getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
         intgr = lambda x: int(x) if x.isdigit() else x

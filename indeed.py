@@ -138,10 +138,6 @@ class View(flask.views.MethodView):
             csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
 
         def writeCsv():
-            if not number:
-                pass
-            else:
-                # csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
                 with open(directory+'/'+what.upper()+where+'.csv','w') as f:
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
                     writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
@@ -169,7 +165,7 @@ class View(flask.views.MethodView):
         i = 0
         # testList = []
         csvList = []
-        while i<searchLimit:
+        while i<10:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr='+staffing+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
@@ -202,33 +198,8 @@ class View(flask.views.MethodView):
                         contactData = moreSoup.find_all('div',{'class':"b_factrow"})
                         altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
-                        # testList.append([firmName,jobTitle,jobCity,jobState])
-
-                        # creates short link for each job posting
-                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
-                        #     source = 'http://www.indeed.com'+link.get('href')
-                        #     post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-                        #     payload = {'longUrl': source}
-                        #     headers = {'content-type':'application/json'}
-                        #     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
-                        #     text = r.content
-                        #     lead_site = str(json.loads(text)['id'])
 
                         googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCityState+'"+"'+firmName+'"-intitle:"profiles" -inurl:"dir/ " site:linkedin.com/in/ OR site:linkedin.com/pub/'
-
-                        # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
-                        # nameReq = requests.get(bingNameSearch)
-                        # nameSoup = BeautifulSoup(nameReq.content)
-                        # namesList = []
-                        # for n in nameSoup.find_all('li',{'class':'b_algo'}):
-                        #     if re.search('^.* \|.*LinkedIn',n.text):
-                        #         name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
-                        #         namesList.append(name)
-                        #         names = str(namesList)
-                        #         names = re.sub('(\')',' ',str(names))
-                        #         names = names.translate(None,'\[\]').strip()
-
-                        # dummy_variables/autoDialFormat
 
                         lead_fname = 'empty'
                         lead_mname = 'Empty'
@@ -330,47 +301,7 @@ class View(flask.views.MethodView):
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
-        # newList = [list(x[0:2]) for x in csvList]
-        # noReps = [x for x,_ in itertools.groupby(newList)]
 
-        # if limit[5]>=1000:
-        #     scrapeRate = float(len(noReps))/len(testList)*100
-
-        # else:
-        #     scrapeRate = float(len(noReps))/len(testList)*100
-            
-        # scrapeRateStat = '%.3f'%round(scrapeRate,3)
-
-        # flask.flash('\n\n')
-        # flask.flash('SCRAPE RATES:')
-        # stats = str(scrapeRateStat)+'% scrape rate'
-        # flask.flash(stats),#'-- Actual'
-
-        # testStats = '%.3f'%(float(len(noReps))/len(testList)*100)
-
-        # nonScraped = []
-        # newList = [i[0:2] for i in csvList]
-
-        # for x in testList:
-        #     if x[0:2] not in newList:
-        #         nonScraped.append([x])
-        #         # with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
-        #         #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-        #         #     [writer.writerow(row) for row in nonScraped]
-        #         print '\n'
-        #     else:
-        #         pass
-        # flask.flash('NON-scraped'+what.upper()+where+'.csv is ready in '+directory+'\n')
-        # flask.flash(str(len(nonScraped))+' out of '+str(len(testList))+' were NOT scraped\n\n')
-
-        # # else:
-        # for x in testList:
-        #     if x[0:2] not in newList:
-        #         nonScraped.append([x])
-        #     else:
-        #         pass
-
-        # conn.close()
         return output
 
 
