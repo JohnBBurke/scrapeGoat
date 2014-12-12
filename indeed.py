@@ -166,7 +166,7 @@ class View(flask.views.MethodView):
         i = 0
         # testList = []
         csvList = []
-        while i<10:
+        while i<searchLimit:
             try:
                 url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr='+staffing+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
                 r = requests.get(url)
