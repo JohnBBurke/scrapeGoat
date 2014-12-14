@@ -26,7 +26,7 @@ def bashScript(code,package):
         'installing ',package,'....'
         print '---------------------------------'
 
-if subprocess.call('easy_install pip',shell=True) == 0:
+if subprocess.call('pip -V',shell=True) == 0:
     print '---------------------------------'
     print 'pip installed'
     print '---------------------------------'
@@ -216,7 +216,7 @@ class View(flask.views.MethodView):
                         #     text = r.content
                         #     lead_site = str(json.loads(text)['id'])
 
-                        googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCityState+'"+"'+firmName+'"-intitle:"profiles" -inurl:"dir/ " site:linkedin.com/in/ OR site:linkedin.com/pub/'
+                        googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCity+'+'+jobState+'"+"'+firmNamePlus+'"-intitle:"profiles"-inurl:"dir/"site:linkedin.com/in/ OR site:linkedin.com/pub/'
 
                         # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
                         # nameReq = requests.get(bingNameSearch)
@@ -282,10 +282,11 @@ class View(flask.views.MethodView):
                                             appendit()
                                         else:
                                             number = re.findall(altRegNum,str(num))
-                                            for z in number:
-                                                number = z
-                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                            appendit()
+                                            if number:
+                                                for z in number:
+                                                    number = z
+                                                    reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                                appendit()
                     except:
                         pass
             except Exception as e:

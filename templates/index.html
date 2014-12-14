@@ -66,10 +66,9 @@
 		</form>
 		{% with messages = get_flashed_messages() %}
 			{% if messages %}
-				search results:
 				<pre>
 					{% for message in messages %}
-{{message}}
+						<li>{{ message }}</li>
 					{% endfor %}
 				</pre>
 			{% endif %}

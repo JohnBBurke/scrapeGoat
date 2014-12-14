@@ -15,7 +15,6 @@ import io
 import sys
 
 
-
 def bashScript(code,package):
     if subprocess.call(code,shell=True) == 0:
         print package, 'installed'
@@ -25,7 +24,7 @@ def bashScript(code,package):
         'installing ',package,'....'
         print '---------------------------------'
 
-if subprocess.call('easy_install pip',shell=True) == 0:
+if subprocess.call('pip -V',shell=True) == 0:
     print '---------------------------------'
     print 'pip installed'
     print '---------------------------------'
@@ -203,7 +202,7 @@ class View(flask.views.MethodView):
                         altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
                         altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
 
-                        googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCityState+'"+"'+firmName+'"-intitle:"profiles" -inurl:"dir/ " site:linkedin.com/in/ OR site:linkedin.com/pub/'
+                        googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCity+'+'+jobState+'"+"'+firmNamePlus+'"-intitle:"profiles"-inurl:"dir/"site:linkedin.com/in/ OR site:linkedin.com/pub/'
 
                         lead_fname = 'empty'
                         lead_mname = 'Empty'
@@ -255,10 +254,11 @@ class View(flask.views.MethodView):
                                             appendit()
                                         else:
                                             number = re.findall(altRegNum,str(num))
-                                            for z in number:
-                                                number = z
-                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
-                                            appendit()
+                                            if number:
+                                                for z in number:
+                                                    number = z
+                                                    reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                                appendit()
                     except:
                         pass
             except Exception as e:
