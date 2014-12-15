@@ -5,8 +5,12 @@ Scrapes *WEBSITE*.com for job postings, then plugs that data into *SEARCHENGINE*
 
 to run:
 
-git clone https://www.github.com/tmthyjames/scrpeGoat.git
+git clone https://www.github.com/tmthyjames/scrapegoat.git
 
 cd scrapeGoat
 
-python indeed.py
+python indeed or ./indeed
+
+for linkedin url as goo.gl short url:
+
+python indeedurl or ./indeedurl
