@@ -1,3 +1,0 @@
-#!/bin/bash
-
-sudo bash -c 'echo -e "127.0.0.1\tscrape.indeed\n" >> /etc/hosts'
