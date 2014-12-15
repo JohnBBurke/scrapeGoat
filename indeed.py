@@ -20,7 +20,7 @@ def bashScript(code,package):
         print package, 'installed'
         print '---------------------------------'
     else:
-        subprocess.call('sudo pip install '+package, shell=True)
+        subprocess.call('pip install '+package, shell=True)
         'installing ',package,'....'
         print '---------------------------------'
 
@@ -138,9 +138,9 @@ class View(flask.views.MethodView):
             csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
 
         def writeCsv():
-                with open(directory+'/'+what.upper()+where+'.csv','w') as f:
+                with open(directory+'/'+re.sub('\W','',what).upper()+where+'.csv','w') as f:
                     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
-                    writer.writerow(['lead_fname','lead_mname','lead_lname','lead_number','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
+                    writer.writerow(['lead_fname','lead_mname','lead_lname','lead_phone','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
                     [writer.writerow(row) for row in csvList]
                 # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
                 #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
@@ -301,7 +301,7 @@ class View(flask.views.MethodView):
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("lead_fname,lead_mname,lead_lname,lead_number,name_prefix,name_suffix,firm_name,lead_email,lead_address,date_published,job_city,job_state,lead_zip,lead_description,lead_site,lead_title,balance_due,linkedin_data,custom2"+'\n'+si.getvalue())
+        output = make_response("lead_fname,lead_mname,lead_lname,lead_phone,name_prefix,name_suffix,firm_name,lead_email,lead_address,date_published,job_city,job_state,lead_zip,lead_description,lead_site,lead_title,balance_due,linkedin_data,custom2"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+what.upper()+where+".csv"
         output.headers["Content-type"] = "text/csv"
 
