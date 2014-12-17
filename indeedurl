@@ -48,9 +48,13 @@ import requests
 
 home = expanduser("~")
 
-if 'cd scrapegoat' in open(home+'/.bash_profile').read():
-    print 'opening in scrapegoat'
-    print '---------------------------------'
+
+if os.path.isfile('.bash_profile') == True: 
+    if 'cd scrapegoat' in open(home+'/.bash_profile').read():
+        print 'opening in scrapegoat'
+        print '---------------------------------'
+    else:
+        subprocess.call('''cd && sudo bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''')
 else:
     subprocess.call('''cd && touch .bash_profile && sudo bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''', shell=True)
     print 'will now open in scrapegoat'
