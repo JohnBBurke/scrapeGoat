@@ -20,21 +20,21 @@ import sys
 def bashScript(code,package):
     if subprocess.call(code,shell=True) == 0:
         print package, 'installed'
-        print '---------------------------------'
+        print '------------------------------------------'
     else:
         subprocess.call('pip install '+package, shell=True)
         'installing ',package,'....'
-        print '---------------------------------'
+        print '------------------------------------------'
 
 if subprocess.call('pip -V',shell=True) == 0:
-    print '---------------------------------'
+    print '------------------------------------------'
     print 'pip installed'
-    print '---------------------------------'
+    print '------------------------------------------'
 else:
     subprocess.call('sudo easy_install pip',shell=True)
-    print '---------------------------------'
+    print '------------------------------------------'
     print 'installing pip...'
-    print '---------------------------------'
+    print '------------------------------------------'
 
 bashScript(code="python -c 'import requests'",package='requests==2.0.0')
 bashScript(code="python -c 'import bs4'",package='beautifulsoup4==4.3.1')
@@ -52,30 +52,32 @@ home = expanduser("~")
 if os.path.isfile(home+'/.bash_profile'): 
     if 'scrapegoat' in open(home+'/.bash_profile').read():
         print 'opening in scrapegoat'
-        print '---------------------------------'
+        print '------------------------------------------'
         pass 
     else:
         subprocess.call('''cd && bash -c "echo -e '# added by scrapegoat\ncd scrapegoat' >> .bash_profile"''',shell=True)
-        print 'now opening in scrapegoat'
-        print '---------------------------------' 
+        subprocess.call('''cd && echo "alias sg=\'cd && cd scrapegoat\'" >> .bash_profile''',shell=True)
+        print 'now opening in scrapegoat, sg alias added'
+        print '------------------------------------------' 
 else:
     subprocess.call('''cd && touch .bash_profile && bash -c "echo -e '# added by scrapegoat\ncd scrapegoat' >> .bash_profile"''', shell=True)
-    print 'will now open in scrapegoat'
-    print '---------------------------------'
+    subprocess.call('''cd && echo "alias sg=\'cd && cd scrapegoat\'" >> .bash_profile''',shell=True)
+    print 'will now open in scrapegoat, sg alias added'
+    print '------------------------------------------'
 
 if 'scrape.indeed' in open('/private/etc/hosts').read():
     print 'scrape.indeed already initialized'
-    print '---------------------------------'
+    print '------------------------------------------'
     pass
 else:
     subprocess.call('''sudo bash -c "echo -e '# added by scrapegoat\n127.0.0.1\tscrape.indeed\n' >> /private/etc/hosts"''',shell=True)
     print 'scraped.indeed now initialized'
-    print '---------------------------------'
+    print '------------------------------------------'
 
 try:
     subprocess.call('open http://scrape.indeed:5000',shell=True)
     print 'running on scrape.indeed:5000'
-    print '---------------------------------'
+    print '------------------------------------------'
 except:
     subprocess.call('open http://127.0.0.1:5000',shell=True)
 
