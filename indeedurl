@@ -49,14 +49,15 @@ import requests
 home = expanduser("~")
 
 
-if os.path.isfile('.bash_profile') == True: 
-    if 'cd scrapegoat' in open(home+'/.bash_profile').read():
+if os.path.isfile(home+'/.bash_profile'): 
+    if 'scrapegoat' in open(home+'/.bash_profile').read():
         print 'opening in scrapegoat'
         print '---------------------------------'
+        pass 
     else:
-        subprocess.call('''cd && sudo bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''',shell=True)
+        subprocess.call('''cd && bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''',shell=True)
 else:
-    subprocess.call('''cd && touch .bash_profile && sudo bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''', shell=True)
+    subprocess.call('''cd && touch .bash_profile && bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''', shell=True)
     print 'will now open in scrapegoat'
     print '---------------------------------'
 
@@ -65,7 +66,7 @@ if 'scrape.indeed' in open('/private/etc/hosts').read():
     print '---------------------------------'
     pass
 else:
-    subprocess.call('''sudo bash -c "echo -e '127.0.0.1\tscrape.indeed\n' >> /private/etc/hosts"''',shell=True)
+    subprocess.call(''' bash -c "echo -e '127.0.0.1\tscrape.indeed\n' >> /private/etc/hosts"''',shell=True)
     print 'scraped.indeed now initialized'
     print '---------------------------------'
 
