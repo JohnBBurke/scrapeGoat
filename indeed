@@ -46,6 +46,15 @@ import flask, flask.views
 from bs4 import BeautifulSoup
 import requests
 
+home = expanduser("~")
+
+if 'cd scrapegoat' in open(home+'/.bash_profile').read():
+    print 'opening in scrapegoat'
+    print '---------------------------------'
+else:
+    subprocess.call('''cd && sudo bash -c "echo -e 'cd scrapegoat' >> .bash_profile"''', shell=True)
+    print 'will now open in scrapegoat'
+    print '---------------------------------'
 
 if 'scrape.indeed' in open('/private/etc/hosts').read():
     print 'scrape.indeed already initialized'
