@@ -157,7 +157,7 @@ class View(flask.views.MethodView):
           return output
         
         def appendit():
-            csvList.append([number,lead_fname,lead_mname,lead_lname,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
+            csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
 
         # def writeCsv():
         #     csvfile = directory+'/'+re.sub('\W','',what)+where+jobType+re.sub('\W','',salary)+'.csv'
@@ -324,7 +324,7 @@ class View(flask.views.MethodView):
         si = io.BytesIO()
         cw = csv.writer(si)
         [cw.writerow(row) for row in csvList]
-        output = make_response("lead_phone,lead_fname,lead_mname,lead_lname,name_prefix,name_suffix,lead_company,lead_email,lead_address,lead_apto,lead_city,lead_state,lead_zip,lead_description,lead_website,lead_title,balance_due,custom1,custom2"+'\n'+si.getvalue())
+        output = make_response("lead_fname,lead_mname,lead_lname,lead_phone,name_prefix,name_suffix,lead_company,lead_email,lead_address,lead_apto,lead_city,lead_state,lead_zip,lead_description,lead_website,lead_title,balance_due,custom1,custom2"+'\n'+si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename="+re.sub('\W','',what)+where+jobType+re.sub('\W','',salary)+".csv"
         output.headers["Content-type"] = "text/csv"
 
