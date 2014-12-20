@@ -1,0 +1,406 @@
+#!/usr/bin/env python
+
+from datetime import timedelta
+from os.path import expanduser
+from itertools import groupby
+from collections import OrderedDict
+from time import sleep
+from random import uniform
+import itertools
+import collections
+import subprocess
+import json
+import os
+import csv
+import re
+import io
+import sys
+
+
+def bashScript(code,package):
+    if subprocess.call(code,shell=True) == 0:
+        print package, 'installed'
+        print '------------------------------------------'
+    else:
+        subprocess.call('pip install '+package, shell=True)
+        'installing ',package,'....'
+        print '------------------------------------------'
+
+if subprocess.call('pip -V',shell=True) == 0:
+    print '------------------------------------------'
+    print 'pip installed'
+    print '------------------------------------------'
+else:
+    subprocess.call('sudo easy_install pip',shell=True)
+    print '------------------------------------------'
+    print 'installing pip...'
+    print '------------------------------------------'
+
+bashScript(code="python -c 'import requests'",package='requests==2.0.0')
+bashScript(code="python -c 'import bs4'",package='beautifulsoup4==4.3.1')
+bashScript(code="python -c 'import flask'",package='flask==0.10.1')
+
+from flask import request, make_response, session
+import flask, flask.views
+# from flaskext.mysql import MySQL
+from bs4 import BeautifulSoup
+import requests
+
+home = expanduser("~")
+
+
+if os.path.isfile(home+'/.bash_profile'): 
+    if 'scrapegoat' in open(home+'/.bash_profile').read():
+        print 'opening in scrapegoat'
+        print '------------------------------------------'
+        pass 
+    else:
+        subprocess.call('''cd && bash -c "echo -e '# added by scrapegoat\ncd scrapegoat' >> .bash_profile"''',shell=True)
+        subprocess.call('''cd && echo "alias sg=\'cd && cd scrapegoat\'" >> .bash_profile''',shell=True)
+        # subprocess.call('source ~/.bash_profile', shell=True)
+        print 'now opening in scrapegoat, sg alias added'
+        print '------------------------------------------' 
+else:
+    subprocess.call('''cd && touch .bash_profile && bash -c "echo -e '# added by scrapegoat\ncd scrapegoat' >> .bash_profile"''', shell=True)
+    subprocess.call('''cd && echo "alias sg=\'cd && cd scrapegoat\'" >> .bash_profile''',shell=True)
+    # subprocess.call('source ~/.bash_profile', shell=True)
+    print 'will now open in scrapegoat, sg alias added'
+    print '------------------------------------------'
+
+if 'scrape.indeed' in open('/private/etc/hosts').read():
+    print 'scrape.indeed already initialized'
+    print '------------------------------------------'
+    pass
+else:
+    subprocess.call('''sudo bash -c "echo -e '# added by scrapegoat\n127.0.0.1\tscrape.indeed\n' >> /private/etc/hosts"''',shell=True)
+    print 'scraped.indeed now initialized'
+    print '------------------------------------------'
+
+try:
+    subprocess.call('open http://scrape.indeed:5000',shell=True)
+    print 'running on scrape.indeed:5000'
+    print '------------------------------------------'
+except:
+    subprocess.call('open http://127.0.0.1:5000',shell=True)
+
+# {
+#     "detect_indentation": False
+# }
+
+# mysql = MySQL()
+app = flask.Flask(__name__)
+app.secret_key = os.urandom(32)
+# app.config['MYSQL_DATABASE_USER'] = 'name'
+# app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
+# app.config['MYSQL_DATABASE_DB'] = '*DB*'
+# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+# mysql.init_app(app)
+
+# conn = mysql.connect()
+# cursor = conn.cursor()
+
+home = expanduser("~")
+desktop = home+'/Desktop'
+desktopCheck = os.path.isdir(home+"/Desktop")
+directory = desktop if desktopCheck is True else home   
+
+
+class View(flask.views.MethodView):
+
+    def get(self):
+        return flask.render_template('index.html')
+
+
+    @app.route('/download')
+    def post(self):
+
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=45)
+
+        what = flask.request.form['what'].title()
+        where = flask.request.form['where'].title()
+        jobType = flask.request.form['jt'].title()
+        salary = flask.request.form['salary'].title()
+        fromage = flask.request.form['fromage'].title()
+        staffing = flask.request.form['sr'].title()
+
+        regNum = re.compile(r'[0-9]{3}-[0-9]{4}')
+        altRegNum = re.compile(r'.[0-9]{3}. ?[0-9]{3}-[0-9]{4}|[0-9]{3}[-\.][0-9]{3}[-\.][0-9]{4}')
+
+        regexPeriod = re.compile('^[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
+        regexDash = re.compile('^[0-9]{3}-[0-9]{3}-[0-9]{4}')
+        regex800 = re.compile('^1-[0-9]{3}-[0-9]{3}-[0-9]{4}')
+        regexPeriod1 = re.compile('^1\.[0-9]{3}\.[0-9]{3}\.[0-9]{4}')
+
+        def reformatNumber(xperiod,xdash,x800,xperiod1,number):
+            number = number.encode('utf-8').strip()
+            if re.search(x800,number):
+                number = number[0]+' ('+number[2:5]+') '+number[6:]
+                print number
+            elif re.search(xdash,number):
+                number = '('+number[0:3]+') '+number[4:]
+                print number
+            elif re.search(xperiod,number):
+                number = '('+number[0:3]+') '+number[4:7]+'-'+number[8:]
+                print number
+            elif re.search(xperiod1,number):
+                number = number[0]+' ('+number[2:5]+') '+number[6:9]+'-'+number[10:]
+                print number
+            else:
+                pass
+
+        def uniq(input):
+          output = []
+          for x in input:
+            if x not in output:
+              output.append(x)
+          return output
+        
+        def appendit():
+            csvList.append([number,lead_fname,lead_mname,lead_lname,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
+
+        # def writeCsv():
+        #         # csvList.append([lead_fname,lead_mname,lead_lname,number,name_prefix,name_suffix,firmName,lead_email,lead_address,lead_apto,jobCity,jobState,lead_zip,jobTitle,lead_site,lead_title,balance_due,googleNameSearch,custom2]) 
+        #     csvfile = directory+'/'+re.sub('\W','',what)+where+jobType+re.sub('\W','',salary)+'.csv'
+        #     with open(csvfile,'w') as f:
+        #         writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+        #         writer.writerow(['lead_phone','lead_fname','lead_mname','lead_lname','name_prefix','name_suffix','firm_name','lead_email','lead_address','date_published','job_city','job_state','lead_zip','job_title','lead_site','lead_title','balance_due','linkedin_data','custom2'])
+        #         [writer.writerow(row) for row in csvList]
+            # cursor.execute('INSERT into *DB* (firmname,jobtitle,jobcity,jobstate,phoneNumber,URLtoLinkedInData) values (%s, %s, %s, %s,%s,%s)',
+            #                (firmName,jobTitle,jobCity,jobState,number,bingNameSearch))
+
+        getInfo = lambda x,y,z: item.find_all(x,{y:z})[0].text.encode('utf-8').strip()
+        intgr = lambda x: int(x) if x.isdigit() else x
+
+        url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr='+staffing+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content)
+
+        try:
+            limit = soup.find_all(id='searchCount')[0].text.encode('utf-8').split()
+        except:
+            flask.flash("INDEED.COM RETURNED NO RESULTS!\n\nPlease try again.\n\n")
+            return self.get()
+
+        limit = [re.sub(',','',str(x)) for x in limit]
+        limit = [intgr(x) for x in limit]
+        searchLimit = 1001 if limit[5] >= 1000 else limit[5]+10
+
+        i = 0
+        # testList = []
+        csvList = []
+        while i<searchLimit:
+            try:
+                url = 'http://www.indeed.com/search?q='+what+'&l='+where+'&sr='+staffing+'&as_any=&ttl=&jt='+jobType+'&salary='+salary+'&fromage='+fromage+'&start='+str(i)
+                r = requests.get(url)
+                soup = BeautifulSoup(r.content)
+                gData = soup.find_all('div',{'class':'row'})
+
+                for item in gData:
+                    try:
+                        firmInfo = [getInfo('span','class','company'),
+                                    getInfo('a','target','_blank'),
+                                    getInfo('span','class','location')] # getInfo('span','class','date')
+                        firmName,jobTitle,jobCityState = firmInfo
+                        jobTitle = jobTitle+'!@#'
+
+                        if jobCityState != 'United States':
+                            jobCityState = re.sub('[0-9]*','',jobCityState).strip()
+                            jobCityState = re.sub('\(.*\)','',jobCityState).strip()
+                            jobCity = jobCityState[0:-4].encode('utf-8')
+                            jobState = jobCityState[-2:].encode('utf-8')
+                            jobCityPlus = re.sub(', ','+',jobCity)
+                        else:
+                            jobCity = 'United States'
+                            jobState = ''
+
+                        firmNamePlus = re.sub("\'",'',firmName)
+                        firmNamePlus = re.sub('\W','+',firmName)+'+'
+                        bingSearch = 'http://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState     
+
+                        sleep(uniform(0.001,1.0))
+
+                        info = requests.get(bingSearch)
+                        moreSoup = BeautifulSoup(info.content)
+                        contactData = moreSoup.find_all('div',{'class':"b_factrow"})
+                        altContactData = moreSoup.find_all('div',{'class':'b_imagePair tall_xb'})
+                        altaltContactData = moreSoup.find_all('ul',{'class':'b_vList'})
+                        # testList.append([firmName,jobTitle,jobCity,jobState])
+
+                        googleNameSearch = 'https://www.google.com/search?q="~hr"+"'+jobCity+'+'+jobState+'"+"'+firmNamePlus+'"-intitle:"profiles"-inurl:"dir/"site:linkedin.com/in/ OR site:linkedin.com/pub/'
+
+                        # creates short link for each job posting
+                        # for link in item('a',href=re.compile('^/rc/clk\?jk=|^.*clk\?|^.*\?r=1')):
+                        #     source = 'http://www.indeed.com'+link.get('href')
+                        post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+                        payload = {'longUrl': googleNameSearch}
+                        headers = {'content-type':'application/json'}
+                        r = requests.post(post_url, data=json.dumps(payload), headers=headers)
+                        text = r.content
+                        googleNameSearch = str(json.loads(text)['id'])
+
+                        # bingNameSearch = 'https://www.bing.com/search?q='+firmNamePlus+jobCity+'+'+jobState+'%20name%20site%3Alinkedin.com'
+                        # nameReq = requests.get(bingNameSearch)
+                        # nameSoup = BeautifulSoup(nameReq.content)
+                        # namesList = []
+                        # for n in nameSoup.find_all('li',{'class':'b_algo'}):
+                        #     if re.search('^.* \|.*LinkedIn',n.text):
+                        #         name = re.findall('^(.*) \|',n.text)[-1].encode('utf-8').title()
+                        #         namesList.append(name)
+                        #         names = str(namesList)
+                        #         names = re.sub('(\')',' ',str(names))
+                        #         names = names.translate(None,'\[\]').strip()
+
+                        # dummy_variables/autoDialFormat
+
+                        lead_fname = 'empty'
+                        lead_mname = 'Empty'
+                        lead_lname = 'eMpty'
+                        # lead_phone -> number
+                        name_prefix = 'emPty'
+                        name_suffix = 'empTy'
+                        # lead company -> firmName
+                        lead_email = 'emptY'
+                        lead_address = 'EMpty'
+                        lead_apto = 'EMPTy'
+                        # lead_city -> jobCity
+                        # lead_state -> jobState
+                        lead_zip = 'eMPty'
+                        # lead_description -> jobTitle
+                        lead_site = 'emPTy'
+                        lead_title = 'empTY'
+                        balance_due = 'EmptY'
+                        # custom1 -> googleNameSearch
+                        custom2 = 'EMPTY'
+
+                        for this in contactData:
+                            if re.search(regNum,this.text):
+                                number = re.findall(altRegNum,this.text)[0].encode('utf-8')
+                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                appendit()
+                        for z in altContactData:
+                            if not contactData:
+                                if re.search(altRegNum,z.text):
+                                    number = re.findall(altRegNum,z.text)[0].encode('utf-8')
+                                    reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                    appendit()
+                        for q in altaltContactData:
+                            if not contactData:
+                                if not altContactData:
+                                    if re.search(regNum,q.text):
+                                        number = re.findall(altRegNum,q.text)[0].encode('utf-8')
+                                        reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                        appendit()
+                        for num in moreSoup:
+                            if not contactData:
+                                if not altContactData:
+                                    if not altaltContactData:
+                                        if re.search(altRegNum,moreSoup.text):
+                                            number = re.findall(altRegNum,moreSoup.text)
+                                            for p in number:
+                                                number = p
+                                                reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                            appendit()
+                                        else:
+                                            number = re.findall(altRegNum,str(num))
+                                            if number:
+                                                for z in number:
+                                                    number = z
+                                                    reformatNumber(regexPeriod,regexDash,regex800,regexPeriod1,number)
+                                                appendit()
+                    except:
+                        pass
+            except Exception as e:
+                print e
+                pass
+
+            # data = cursor.fetchone()
+            # conn.commit()
+
+            i+=10
+
+        index = collections.defaultdict(list)
+
+        # generate list of jobs per firm
+        for item in csvList:
+            index[item[6]].append(item[13])
+
+        # insert into existing table
+        for item in csvList:
+        #     del item[1]
+            item[13:14] = index[item[6]]
+
+        csvList = [uniq(i) for i in uniq(csvList)]
+
+        newcsvlist = []
+        for lst in csvList:
+            d = []
+            for k, g in groupby(lst, lambda x: '!@#' in x):
+                if k:
+                    d.append(';    '.join(g))
+                else:
+                    d.extend(g)
+            newcsvlist.append(d)
+
+        csvList = [[re.sub('!@#','',str(j)) for j in i] for i in newcsvlist]
+        csvList = [[re.sub('empty','N/A',str(j),flags=re.IGNORECASE) for j in i] for i in csvList]
+
+        # writeCsv()
+
+        si = io.BytesIO()
+        cw = csv.writer(si)
+        [cw.writerow(row) for row in csvList]
+        output = make_response("lead_phone,lead_fname,lead_mname,lead_lname,name_prefix,name_suffix,lead_company,lead_email,lead_address,lead_apto,lead_city,lead_state,lead_zip,lead_description,lead_website,lead_title,balance_due,custom1,custom2"+'\n'+si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename="+re.sub('\W','',what)+where+jobType+re.sub('\W','',salary)+".csv"
+        output.headers["Content-type"] = "text/csv"
+
+        # newList = [list(x[0:2]) for x in csvList]
+        # noReps = [x for x,_ in itertools.groupby(newList)]
+
+        # if limit[5]>=1000:
+        #     scrapeRate = float(len(noReps))/len(testList)*100
+
+        # else:
+        #     scrapeRate = float(len(noReps))/len(testList)*100
+            
+        # scrapeRateStat = '%.3f'%round(scrapeRate,3)
+
+        # flask.flash('\n\n')
+        # flask.flash('SCRAPE RATES:')
+        # stats = str(scrapeRateStat)+'% scrape rate'
+        # flask.flash(stats),#'-- Actual'
+
+        # testStats = '%.3f'%(float(len(noReps))/len(testList)*100)
+
+        # nonScraped = []
+        # newList = [i[0:2] for i in csvList]
+
+        # for x in testList:
+        #     if x[0:2] not in newList:
+        #         nonScraped.append([x])
+        #         # with open(directory+'/NON-scraped'+what.upper()+where+'.csv','w') as f:
+        #         #     writer = csv.writer(f,delimiter=',',quoting=csv.QUOTE_ALL)
+        #         #     [writer.writerow(row) for row in nonScraped]
+        #         print '\n'
+        #     else:
+        #         pass
+        # flask.flash('NON-scraped'+what.upper()+where+'.csv is ready in '+directory+'\n')
+        # flask.flash(str(len(nonScraped))+' out of '+str(len(testList))+' were NOT scraped\n\n')
+
+        # # else:
+        # for x in testList:
+        #     if x[0:2] not in newList:
+        #         nonScraped.append([x])
+        #     else:
+        #         pass
+
+        # conn.close()
+        return output
+
+
+app.add_url_rule('/',
+                view_func=View.as_view('main'), 
+                methods=['GET','POST'])
+
+
+app.run(debug=True, use_reloader=False)

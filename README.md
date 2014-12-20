@@ -1,7 +1,7 @@
 scrapeGoat
 ==========
 
-Scrapes *WEBSITE*.com for job postings, then plugs that data into *SEARCHENGINE*.com to get contact info. 
+Scrapes indeed.com for job postings, then plugs that data into bing.com to get contact info. 
 
 to run:
 
